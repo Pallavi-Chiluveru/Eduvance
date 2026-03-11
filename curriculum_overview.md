@@ -1,0 +1,937 @@
+# DLSES Curriculum Overview
+
+This document provides a comprehensive list of topics covered across all subjects in the DLSES platform.
+
+## Artificial Intelligence
+- Artificial Intelligence Syllabus Discussion and Analysis  for NTA UGC NET
+- What's the FUTURE of Artificial Intelligence in 2025
+- Lec-1: What is Artificial Intelligence | Learn AI with Real Life Examples | Can Machine Think??
+- Lec-2: What is State Space Search | Introduction to Problem Solving in Artificial Intelligence
+- Lec-3: Uninformed Vs Informed Search in Artificial Intelligence with Example
+- Informed vs Uninformed vs Adversarial Search With Examples | Artificial Intelligence
+- Lec-4: Breadth First Search (BFS) with example | Uninformed Search | Artificial Intelligence
+- Lec-5: Depth First Search (DFS) with example | Uninformed Search | Artificial Intelligence
+- Time & Space Complexity of BFS and DFS | Artificial Intelligence
+- Lec-6: Bidirectional Search Algorithm in Artificial Intelligence in Hindi with Real Life Examples
+- Lec-11: Best First Search Algorithm | How it Works | All Imp Points(Pros & Cons)
+- Depth-Limited Search (DLS) Explained | Uninformed Search in AI
+- Iterative Deepening Depth-First Search (IDDFS) | Artificial Intelligence
+- Lec-7: 8-Puzzle Problem in Artificial Intelligence without Heuristic | All Imp Points | Must Watch
+- Lec-8: What is Heuristic in AI | Why we use Heuristic | How to Calculate Heuristic | Must Watch
+- Lec-9: How to Solve 8-Puzzle Problem with Heuristic(Informed Search) in Artificial Intelligence
+- Lec-10: Generate and Test Search in Artificial Intelligence with Examples | Heuristic Search
+- Lec-12: Beam Search Algorithm | All Imp Points | Heuristic Search Techniques
+- Lec-13: Hill Climbing Algorithm in Artificial Intelligence with Real Life Examples| Heuristic Search
+- Lec-14: A* algorithm in AI (artificial intelligence) in HINDI | A* algorithm with example
+- Lec-15: How to Proof A* Admissible| Underestimation & Overestimation of A* in Hindi
+- Lec-16: AO* algorithm in AI (artificial intelligence) in HINDI | AO* algorithm with example
+- Lec-17: Introduction to Game Playing | Learn Game Playing Algorithms with Example
+- Lec-18: Minimax Algorithm in Game Playing | Artificial Intelligence
+- Lec-19: Alpha Beta Pruning in Hindi with Example | Artificial Intelligence
+- Lec-20: Knowledge Representation and Reasoning | Logic, Semantic Net, Frames etc.
+- Lec-21: Propositional Logic in Artificial Intelligence | Knowledge Representation | All Imp Points
+- Lec-22: Introduction to Intelligent Agents and their types with Example in Artificial Intelligence
+- Lec-23: Simple Reflex Agent in Artificial Intelligence with Example | Artificial Intelligence
+- Lec-24: Model Based Reflex Agent in Artificial Intelligence in HINDI with Real Life Examples
+- Lec-25: Goal Based Agents in Artificial Intelligence with real life examples in HINDI
+- Utility Based Agents in Artificial Intelligence in Hindi with real life examples
+- Fuzzy Logic in Artificial Intelligence with Example | Artificial Intelligence
+- Various Operations in Fuzzy Logic with Example | Union, Intersection, Complement etc.
+- Introduction to Neural Networks with Example in HINDI | Artificial Intelligence
+- Natural Language Processing in Artificial Intelligence in Hindi | NLP with Demo and Examples
+- Supervised, Unsupervised and Reinforcement Learning in Artificial Intelligence in Hindi
+- Genetic Algorithm in Artificial Intelligence in Hindi | Simplest Explanation with real life examples
+- What is Constraint Satisfaction | Constraint Satisfaction Problem (CSP) in AI with Example
+- How Constraint Satisfaction Algorithm Works | Explained with Interesting Example | AI
+- Branch & Bound Algorithm with Example | Easiest Explanation of B&B with example
+- 0/1 Knapsack using Branch and Bound with example
+- Reasoning under Uncertainty in Artificial Intelligence
+- When There is Uncertainty🤨#artificialintelligence #shorts #ytshorts #machinelearning
+- Propositional Logic | Artificial Intelligence
+- Predicate Logic | Artificial Intelligence
+- How to write First order/Predicate logic | Artificial Intelligence
+- Negation of Quantifiers | Predicate Logic | Logic with Certainty | Artificial Intelligence
+- Bayes Theorem & Total Probability with Examples
+- Questions on Propositional & Predicate logic | How to Solve Problems in Logic
+- Bayesian Network with Examples | Easiest Explanation
+- Question on Bayesian Network | Artificial Intelligence
+- Likelihood Weight Sampling | Inference through Sampling | Uncertainty in Artificial Intelligence
+- Question on Likelihood Sampling | Probabilistic Inference | Sampling | Artificial Intelligence
+- Rejection Sampling | Probabilistic Inference | Sampling | Artificial Intelligence
+- Probabilistic Inference | Sampling | Artificial Intelligence
+- Bayesian Network Numerical Example #gate2025preparation
+- Lec-31: Token & Parameters in LLama3 META Models | 8B & 70B Parameters Model | GPT model
+- Uncertainty probabilistic inference (Markov Model) | Artificial Intelligence
+- Introduction to Hidden Markov Model | Artificial Intelligence
+
+## Aptitude & Reasoning
+- Introduction to Aptitude and Reasoning
+- Ratio
+- Ratio (Solved Problems) - Part 1
+- Ratio (Solved Problems) - Part 2
+- Proportion
+- Direct and Indirect Proportion
+- Proportion (Solved Problems)
+- Ratio and Proportion (10 Solved Problems)
+- Classification of Numbers
+- Prime and Composite Numbers
+- Number of Factors (Part 1)
+- Number of Factors (Part 2)
+- Number of Even and Odd Factors
+- Power of Prime Number in a Factorial
+- Power of Composite Number in a Factorial
+- The Base System
+- The Base System - Addition
+- The Base System - Subtraction
+- The Base System (Solved Problems)
+- Number of Trailing Zeros in a Factorial
+- Cyclicity of Numbers (Part 1)
+- Cyclicity of Numbers (Part 2)
+- Unit Place Calculation (Part 1)
+- Unit Place Calculation (Part 2)
+- Unit Place Calculation (Part 3)
+- Unit Place Calculation (Solved Problems)
+
+## Computer Organization & Architecture
+- Introduction to Computer Organization and Architecture (COA)
+- Basics of Computer Architecture
+- Classifications of Computer Architecture
+- Introduction to Memory
+- Memory Hierarchy & Interfacing
+- Memory Interfacing – Solved PYQs
+- Introduction to Cache Memory
+- Direct Memory Mapping
+- Direct Memory Mapping – Solved Examples
+- Direct Memory Mapping – Solved PYQs (Part 1)
+- Direct Memory Mapping – Solved PYQs (Part 2)
+- Direct Memory Mapping – Solved PYQs (Part 3)
+- Direct Memory Mapping – Hardware Implementation
+- Associative Mapping
+- Associative Mapping – Solved Examples
+- Associative Mapping – Solved PYQ
+- Set Associative Mapping
+- Set Associative Mapping – Solved Examples (Part 1)
+- Set Associative Mapping – Solved Examples (Part 2)
+- Set Associative Mapping – Solved PYQs (Part 1)
+- Set Associative Mapping – Solved PYQs (Part 2)
+- Cache Memory Mapping – A Comparative Study
+- Cache Memory Mapping – Solved PYQ
+- Set Associative Mapping – Bonus PYQs
+- Cache Design - An Overview
+- Cache Replacement Policies - RR, FIFO, LIFO, & Optimal
+- Cache Replacement Policies - MRU, LRU, Pseudo-LRU, & LFU
+- LRU Cache Replacement Policy - Solved PYQs
+- Cache Coherence Problem & Cache Coherency Protocols
+- Snooping-based Cache Coherency Protocol
+- Directory-based Cache Coherency Protocol
+- Introduction to Primary Memory
+- Primary Memory – Architecture of ROM (Part 1)
+- Primary Memory – Architecture of ROM (Part 2)
+- Primary Memory – Architecture of ROM (Part 3)
+- Primary Memory – Architecture of ROM (Part 4)
+- ROM – Solved Examples
+- Primary Memory – RAM
+- Primary Memory – Solved Example
+- Introduction to Secondary Memory
+- Secondary Memory – Hard Disk Drives
+- Hard Disk Drives (Solved Problems) - Set 1
+- Hard Disk Drives – Recording Density & Rotational Speed
+- Hard Disk Drives (Solved Problems) - Set 2
+- Hard Disk Drives (Solved Problems) - Set 3
+- Hard Disk Drives (Solved Problems) - Set 4
+- Hard Disk Drives (Solved Problems) - Set 5
+- Secondary Memory – Solid State Drives
+- Introduction to Number Systems
+- Binary Number System
+- Octal Number System
+- Hexadecimal Number System
+- Conversion to Decimal Number System
+- Conversion from Decimal Number System
+- Number System – Solved Problems (Set 1)
+- Number System – Solved Problems (Set 2)
+- Number System – Solved Problems (Set 3)
+- Number System – Solved Problems (Set 4)
+- Introduction to Complementary Number Systems
+- Complementary Number Systems - Examples
+- Diminished Radix and Radix Complement
+- Subtraction in Diminished Radix Complement
+- Subtraction in Radix Complement
+- Representations of Binary Numbers
+- Representations of Binary Numbers - Solved Problems
+- Sign bit Extension (Part 1)
+- Sign bit Extension (Part 2)
+- Overflow in Signed and Unsigned Numbers
+- Introduction to Binary Codes
+- 8421, Excess-3, and 3321 Codes
+- Binary Codes - Solved Problems
+- BCD Addition
+- BCD Adder
+- Excess-3 Addition
+- Gray Code
+- Error Detection
+- Error Correction
+- Problem of Encoding in Error Detection and Correction
+- Hamming Code
+- Hamming Code – Solved Problems
+- Floating Point Numbers
+- Representations of Floating Point Numbers
+- Explicit vs. Implicit Normalization of Floating Point Numbers
+- Floating Point Numbers - Solved Problems
+- IEEE Standard for Floating-Point Arithmetic (IEEE 754)
+- IEEE 754 - Single and Double Precision
+- IEEE 754 - Solved Problems (Set 1)
+- IEEE 754 - Solved Problems (Set 2)
+- Binary Multiplication
+- The Concept of Booth’s Algorithm
+- The Implementation of Booth’s Algorithm
+- Binary Division
+- The Concept of Restoring Division
+- Implementation of Restoring Division
+- Improving the Hardware of Restoring Division
+- Non-Restoring Division
+- Machine Instructions & Addressing Modes | Chapter-4 | Computer Organization & Architecture (COA)
+- ALU, Data Path & Control Unit | Chapter-5 | Computer Organization & Architecture (COA)
+- I/O Interfacing | Chapter-6 | Computer Organization & Architecture (COA)
+- Instruction Pipelining | Chapter-7 | Computer Organization & Architecture (COA)
+
+## C Programming
+- C Programming – Features & The First C Program
+- Introduction to Variables
+- Variable Naming Conventions
+- Basic Output Function – printf
+- Fundamental Data Types − Integer (Part 1)
+- Fundamental Data Types − Integer (Part 2)
+- Exceeding The Valid Range of Data Types
+- Fundamental Data Types − Character
+- Fundamental Data Types − Float, Double & Long Double
+- C Programming (Important Questions Set 1)
+- Scope of Variables - Local vs Global
+- Variable Modifiers − Auto & Extern
+- Variable Modifiers − Register
+- Variable Modifiers − Static
+- Constants in C (Part 1)
+- Constants in C (Part 2)
+- C Programming (Important Questions Set 2)
+- Basic Input Function – scanf
+- C Programming (Important Questions Set 3)
+- Introduction to Operators in C
+- Arithmetic Operators in C
+- Increment and Decrement Operators in C (Part 1)
+- Increment and Decrement Operators in C (Part 2)
+- Relational Operators in C
+- Logical Operators in C
+- Bitwise Operators in C (Part 1)
+- Bitwise Operators in C (Part 2)
+- Bitwise Operators in C (Part 3)
+- Bitwise Operators in C (Part 4)
+- Assignment Operators in C
+- Conditional Operator in C
+- Comma Operator in C
+- Precedence and Associativity of Operators
+- Operators in C (Solved Problem 1)
+- Operators in C (Solved Problem 2)
+- C Programming (Rapid Fire Quiz-1)
+- Conditionals (if-else, Nested if and else if)
+- Conditionals (Switch)
+- for and while Loops
+- do-while Loop
+- Loop Control Statements − break and continue
+- Conditionals and Loops (Solved Problem 1)
+- Conditionals and Loops (Solved Problem 2)
+- Conditionals and Loops (Solved Problem 3)
+- Conditionals and Loops (Solved Problem 4)
+- Conditionals and Loops (Solved Problem 5)
+- Special Programs in C − Pyramid of Stars
+- Special Programs in C − Check If The Number Is Palindrome Number
+- Special Programs in C− Check If The Number Is Armstrong Number
+- Special Programs in C− Check If The Number Is Strong Number
+- Special Programs in C − Check If The Number Is Prime Number
+- Special Programs in C − Adding Two Numbers Without Using The Plus Operator
+- Special Programs in C − Adding Two Numbers Without Using The Plus Operator (Half Adder Method)
+- Special Programs in C − Fibonacci Series
+- Special Programs in C − Floyd's Triangle
+- Special Programs in C − Binary to Decimal Conversion
+- Special Programs in C − Calculating Power of an Integer
+- Special Programs in C − Check Leap Year
+- Special Programs in C − Check If The Number Is Perfect Number
+- Introduction to Functions in C
+- Function Declaration in C
+- Function Definition in C
+- Call By Value & Call By Reference in C
+- Functions (Solved Question 1)
+- Functions (Solved Question 2)
+- Functions (Solved Question 3)
+- Static Functions in C
+- Static and Dynamic Scoping (Part-1)
+- Static and Dynamic Scoping (Part-2)
+- Static and Dynamic Scoping (Part-3)
+- Static and Dynamic Scoping (Part-4)
+- Static and Dynamic Scoping (Solved Question 1)
+- Static and Dynamic Scoping (Solved Question 2)
+- Recursion in C
+- How to write Recursive Functions
+- Types of Recursion (Part 1) | Direct & Indirect Recursion
+- Types of Recursion (Part 2) | Tail & Non-tail Recursion
+- Advantage and Disadvantage of Recursion
+- Recursion (Solved Problem 1)
+- Recursion (Solved Problem 2)
+- Recursion (Solved Problem 3)
+- Recursion (Solved Problem 4)
+- Recursion (Solved Problem 5)
+- C Programming (Rapid Fire Quiz-2)
+- Definition of Array
+- Declaration of Array
+- Accessing Array Elements
+- Initializing an Array
+- Designated Initialization of Arrays
+- Arrays in C (Solved Problem 1)
+- Arrays in C (Solved Problem 2)
+- Counting Array Elements using sizeof() Operator
+- Introduction to Multidimensional Arrays
+- Introduction to Two-Dimensional (2D) Arrays
+- Introduction to Three-Dimensional (3D) Arrays
+- Multidimensional Arrays (Solved Problem)
+- C Program for Matrix Multiplication (Part 1)
+- C Program for Matrix Multiplication (Part 2)
+- Constant Arrays in C
+- Variable Length Arrays in C
+- Introduction to Pointers in C
+- Declaring & Initializing Pointers in C
+- Value of Operator in Pointers
+- Pointer Assignment
+- Pointer Application (Finding the Largest & Smallest Elements in an Array)
+- Returning Pointers
+- Pointers (Important Questions)
+- Pointer Arithmetic (Addition)
+- Pointer Arithmetic (Subtraction)
+- Pointer Arithmetic (Increment & Decrement)
+- Pointer Arithmetic (Comparing the Pointers)
+- Pointers (Program 1) | Sum of Array Elements using Pointers
+- Using Array Name as a Pointer
+- Pointers (Program 2) | Reversing a Series of Numbers using Pointers
+- Passing Array as an Argument to a Function
+- Using Pointers to Print 2D Arrays
+- Processing the Multidimensional Array Elements (or) Address Arithmetic of Multidimensional Arrays
+- Pointers (Program 3)
+- Pointers (Program 4)
+- Pointer Pointing to an Entire Array
+- Pointer Pointing to an Entire Array (Solved Problem)
+- Pointers (Program 5)
+- Pointers (Program 6)
+- Pointers (Program 7)
+- Pointers (Program 8)
+- Pointers (Program 9)
+- Basics of String Literals
+- Storing the String Literals
+- Performing Operations on String Literals
+- String Literal vs. Character Constant
+- Declaring and Initializing String Variables
+- Writing Strings using printf and puts Functions
+- Reading Strings using scanf and gets Functions
+- Designing The Input Function using getchar()
+- putchar() Function in C
+- Strings (Solved Problem 1)
+- C String Library and String Copy Function - strcpy()
+- String Length Function - strlen()
+- String Concatenate Functions - strcat() & strncat()
+- String Comparison Function - strcmp()
+- Array of Strings
+- Strings (Solved Problem 2)
+- Strings (Solved Problem 3)
+- Strings (Solved Problem 4)
+- Strings (Solved Problem 5)
+- Strings (Solved Problem 6)
+- Function Pointers in C
+- Application of Function Pointers in C
+- Introduction to Structures in C
+- Declaring Structure Variables
+- Structure Types (Using Structure Tags)
+- Structure Types (Using typedef)
+- Initializing & Accessing the Structure Members
+- Designated Initialization in Structures
+- Declaring an Array of Structure
+- Pointer to Structure Variable
+- Structure Padding in C
+- Structure Packing in C
+- Structures in C (Solved Problem 1)
+- Structures in C (Solved Problem 2)
+- Structures in C (Solved Problem 3)
+- Introduction to Unions in C
+- Unions in C (Solved Problem 1)
+- Application of Unions (Part 1)
+- Application of Unions (Part 2)
+- Enumerations in C
+- Program to Find Area of Rectangle Using Structures
+- Structures & Unions in C (Solved Problem)
+- File Handling | Chapter-14 | C Programming | nesoacademy.org
+
+## Database Management Systems (DBMS)
+- Introduction to Database Management Systems (DBMS)
+- DBMS - Definition
+- Applications of DBMS
+- File System vs. Database Management System
+- Three Tier Architecture
+- View of Data
+- Instances and Schemas in DBMS
+- Database Users
+- Database Administrator (DBA)
+- Introduction to Data Models
+- Database System Architecture - Part 1
+- Database System Architecture - Part 2
+- History of DBMS
+- Database Languages and Software
+- Introduction to DBMS - Solved Questions
+- Introduction to Relational Databases
+- Codd’s 12 Rules (13 Rules)
+- Database Schema
+- Keys in RDBMS
+- Keys in RDBMS (Solved Questions)
+- Schema Diagrams
+- Relational Query Languages
+- Basics of Relational Algebra
+- Relational Algebra (Select Operation)
+- Relational Algebra (Project Operation)
+- Relational Algebra (Union Operation)
+- Relational Algebra (Set Difference Operation)
+- Relational Algebra (Cartesian Product Operation)
+- Relational Algebra (Rename Operation)
+- Relational Algebra (Set Intersection Operation)
+- Relational Algebra (Assignment Operation)
+- NULL Values in RDBMS
+- Relational Algebra (Natural Join Operation)
+- Relational Algebra (Division Operation)
+- Relational Algebra (Outer Join Operation)
+- Relational Algebra (Solved Problem 1)
+- Relational Algebra (Solved Problem 2)
+- Relational Algebra (Solved Problem 3)
+- Relational Algebra (Solved Problem 4)
+- Relational Algebra (Solved Problem 5)
+- Tuple Relational Calculus (Formal Definition)
+- Tuple Relational Calculus (Example Queries)
+- Domain Relational Calculus (Formal Definition)
+- Domain Relational Calculus (Example Queries)
+- Relational Algebra (Rapid Fire Quiz)
+- Database Design
+- Introduction to E-R Model (Part 1)
+- Introduction to E-R Model (Part 2)
+- Types of Attribute in DBMS
+- Mapping Cardinalities
+- Entity-Relationship (ER) Diagram
+- Mapping Cardinality in ER Diagram
+- Participation Constraints in DBMS
+- ER Diagram for University Database
+- ER Diagram for Banking Enterprise
+- ER Diagram for Hospital Management System
+- Extended ER Features
+- ER Model (Solved Problem 1)
+- ER Model (Solved Problem 2)
+- ER Model (Solved Problem 3)
+- ER Model (Rapid Fire Quiz)
+- Introduction to Structured Query Language (SQL)
+- Data Definition Language (DDL)
+- DDL Commands - CREATE
+- Constraints in SQL
+- Constraints in SQL (Example Queries)
+- Primary Key and Foreign Key Constraints in SQL
+- DDL Commands - ALTER
+- DDL Commands - TRUNCATE, DROP, and RENAME
+- DML Commands - INSERT and UPDATE
+- DML Commands - DELETE and SELECT
+- Data Control Language (DCL)
+- Transaction Control Language (TCL)
+- Aggregate Functions in SQL
+- GROUP BY and HAVING Clause in SQL
+- ORDER BY in SQL
+- LIKE in SQL
+- IN in SQL
+- BETWEEN in SQL
+- Alias (AS) in SQL
+- TOP, LIMIT, FETCH FIRST, and ROWNUM in SQL
+- NULL Functions in SQL
+- ANY and ALL Operators in SQL
+- CASE Expression in SQL
+- Comments in SQL
+- Joins in SQL
+- SQL - Solved Problem 1
+- SQL - Solved Problem 2
+- SQL - Solved Problem 3
+- SQL (Rapid Fire Quiz)
+
+## Data Structures
+- Introduction to Data Structures
+- Data Types vs. Abstract Data Types
+- Data Structure Definition & Advantages
+- Types of Data Structures
+- Basics of Asymptotic Analysis (Part 1)
+- Basics of Asymptotic Analysis (Part 2)
+- Basics of Asymptotic Analysis (Part 3)
+- Basics of Asymptotic Analysis (Part 4)
+- Basics of Asymptotic Analysis (Part 5)
+- Guidelines for Asymptotic Analysis (Part 1)
+- Guidelines for Asymptotic Analysis (Part 2)
+- Asymptotic Analysis (Solved Problem 1)
+- Asymptotic Analysis (Solved Problem 2)
+- Asymptotic Analysis (Solved Problem 3)
+- Understanding the Void Pointers
+- Understanding the Null Pointers
+- Understanding the Dangling Pointers
+- Understanding the Wild Pointers
+- Basics of Dynamic Memory Allocation
+- Dynamic Memory Allocation using malloc()
+- Dynamic Memory Allocation using calloc()
+- Dynamic Memory Allocation using realloc()
+- Releasing the Dynamically Allocated Memory using free()
+- Structures and Functions (Part 1)
+- Structures and Functions (Part 2)
+- Structures and Functions (Part 3)
+- Structures and Functions (Part 4)
+- Structures and Functions (Part 5)
+- Structures and Functions (Part 6)
+- Self Referential Structures
+- Introduction to Linked List
+- Array vs. Single Linked List (In Terms of Representation)
+- Creating the Node of a Single Linked List
+- Creating a Single Linked List (Part 1)
+- Creating a Single Linked List (Part 2)
+- Traversing a Single Linked List (Counting the Nodes)
+- Traversing a Single Linked List (Printing the Data)
+- Traversing the List (Linked List vs. Arrays)
+- Single Linked List (Inserting a Node at the End)
+- Insertion at the End (Linked List vs. Array) - Part 1
+- Insertion at the End (Linked List vs. Array) - Part 2
+- Single Linked List (Inserting a Node at the Beginning)
+- Inserting the Data at the Beginning of Single Linked Lists (Possible Mistake)
+- Inserting the Data at the Beginning of Single Linked List (2nd Method)
+- Inserting the Data at the Beginning (Singly Linked List vs. Array)
+- Single Linked List (Inserting a Node at a Certain Position)
+- Insertion at a Certain Position (Singly Linked List vs. Arrays) - Part 1
+- Insertion at a Certain Position (Singly Linked List vs. Arrays) - Part 2
+- Single Linked List (Deleting the First Node)
+- Single Linked List (Deleting the Last Node)
+- Single Linked List (Deleting the Last Node using Single Pointer)
+- Deletion at the End (Singly Linked List vs. Array)
+- Deletion at the Beginning (Single Linked List vs. Array)
+- Single Linked List (Deleting the Node at a Particular Position)
+- Deleting the Entire Single Linked List
+- Reverse a Single Linked List
+- Singly Linked List (Solved Problem 1)
+- Singly Linked List (Solved Problem 2)
+- Singly Linked List (Solved Problem 3)
+- Singly Linked List (Solved Problem 4)
+- Singly Linked List (Solved Problem 5)
+- Singly Linked List (Solved Problem 6)
+- Rapid Fire Quiz (Singly Linked List)
+- Introduction to Doubly Linked List
+- Doubly Linked List (Inserting a Node in an Empty List)
+- Doubly Linked List (Insertion at the Beginning)
+- Doubly Linked List (Insertion at the End)
+- Doubly Linked List (Insertion between the Nodes) - Part 1
+- Doubly Linked List (Insertion between the Nodes) - Part 2
+- Creating an Entire Doubly Linked List
+- Doubly Linked List (Deleting the First Node)
+- Doubly Linked List (Deleting the Last Node)
+- Doubly Linked List (Deleting the Intermediate Node)
+- Reversing the Doubly Linked List
+- Doubly Linked List (Solved Problem 1)
+- Doubly Linked List (Solved Problem 2)
+- Why Doubly Linked List?
+- Rapid Fire Quiz (Doubly Linked List)
+- Introduction to Circular Linked List
+- Circular Singly Linked List (Insertion at the Beginning)
+- Traversing a Circular Singly Linked List
+- Circular Singly Linked List (Insertion at the End)
+- Circular Singly Linked List (Insertion between the Nodes)
+- Creating a Circular Singly Linked List
+- Circular Singly Linked List (Deleting the First Node)
+- Circular Singly Linked List (Deleting the Last Node)
+- Circular Singly Linked List (Deleting the Intermediate Node)
+- Circular Singly Linked List (Counting the Number of Elements)
+- Circular Singly Linked List (Searching an Element)
+- Circular Doubly Linked List (Insertion at the Beginning)
+- Circular Doubly Linked List (Insertion at the End)
+- Circular Doubly Linked List (Insertion between the Nodes)
+- Circular Doubly Linked List (Deleting the First Node)
+- Circular Doubly Linked List (Deleting the Last Node)
+- Circular Doubly Linked List (Deleting the Intermediate Node)
+- Sorted Singly Linked List (Inserting a New Element)
+- Application of Linked List (Polynomial Arithmetic) - Part 1
+- Application of Linked List (Polynomial Arithmetic) - Part 2
+- Application of Linked List (Addition of Two Polynomials)
+- Application of Linked List (Multiplication of Two Polynomials)
+- Application of Linked List (Multiplication of Two Polynomials) - Improvements
+- Adding Two Numbers using Linked Lists - Part 1
+- Adding Two Numbers using Linked Lists - Part 2
+- Adding Two Numbers using Linked Lists - Part 3
+- Introduction to Stacks
+- Array Implementation of Stacks (Part 1)
+- Array Implementation of Stacks (Part 2)
+- Array Implementation of Stacks (Part 3)
+- Array Implementation of Stacks (Part 4)
+- Stacks (Important Questions) – Set 1
+- Stacks (Important Questions) – Set 2
+- Stacks (Program 1) – Part 1
+- Stacks (Program 1) – Part 2
+- Stacks (Program 1) – Part 3
+- Stacks (Program 2) – Part 1
+- Stacks (Program 2) – Part 2
+- Stacks (Program 3)
+- Linked List Implementation of Stacks (Part 1)
+- Linked List Implementation of Stacks (Part 2)
+- Linked List Implementation of Stacks (Part 3)
+- Stacks (Program 4) – Part 1
+- Stacks (Program 4) – Part 2
+- Stacks (Program 4) – Part 3
+- Stacks (Program 4) – Part 4
+- Stacks (Program 4) – Part 5
+- Stacks (Program 4) – Part 6
+- Stacks (Program 4) – Part 7
+- Stacks (Program 5)
+- Application of Stacks (Nested Brackets) - Part 1
+- Application of Stacks (Nested Brackets) - Part 2
+- Application of Stacks (Infix to Postfix) - Part 1
+- Application of Stacks (Infix to Postfix) - Part 2
+- Application of Stacks (Infix to Postfix) - Part 3
+- Application of Stacks (Infix to Postfix) - Part 4
+- Application of Stacks (Infix to Postfix) - Part 5
+- Application of Stacks (Infix to Postfix) - Part 6
+- Application of Stacks (Infix to Postfix) - Part 7
+- Application of Stacks (Infix to Postfix) - Part 8
+- Stacks (GATE Problems) - Set 1
+- Stacks (GATE Problems) - Set 2
+- Queues | Chapter-7 | Data Structures | nesoacademy.org
+- Binary Trees | Chapter-8 | Data Structures | nesoacademy.org
+- Binary Search Trees | Chapter-9 | Data Structures | nesoacademy.org
+- AVL Trees | Chapter-10 | Data Structures | nesoacademy.org
+
+## Java Programming
+- Why take this Java Course?
+- Programs and Programming Languages
+- Introduction to Java Programming
+- Anatomy of Java Program
+- Displaying Messages in Java
+- Displaying Numbers in Java
+- Configuring our Java Development Environment
+- Creating, Compiling, and Executing a Java Program
+- Our First Java Project
+- Java Packages, Classes, and Methods
+- public, private, and static in Java
+- The void Return Type in Java
+- Command Line Arguments in Java
+- Programming Styles
+- Programming Errors
+- Type Faster in IntelliJ
+- Java Exercise - Creating Classes & Methods
+- Java Basics - An Overview
+- Introduction to Variables in Java
+- Variables in Java - Practice
+- Constants in Java
+- Identifiers in Java
+- Introduction to Data Types in Java
+- The int Data Type in Java
+- The byte, short, and long Data Types in Java
+- Integers Data Types in Java - Practice
+- Bytes and Values in Java
+- The double and float Data Types in Java
+- The char Data Type in Java
+- The boolean Data Type in Java
+- The String Data Type in Java
+- Calling String Methods in Java
+- Concatenating Strings in Java
+- Primitive Types and Reference Types in Java
+- Instantiating a String Object
+- Strings are Immutable in Java
+- The Scanner Class in Java
+- Reading Input From the Keyboard in Java
+- Java Exercise – Favorite Number
+- Java Exercise – Name and Age
+- Literals in Java
+- The Assignment Operator in Java
+- Arithmetic Operators in Java
+- Increment and Decrement Operators in Java
+- Casting in Java
+- The Division Operator in Java
+- The Division Operator (Examples)
+- Relational Operators in Java
+- Logical Operators in Java
+- Conditional Operator in Java
+- if Statement in Java
+- if Statement – Exercise
+- if-else Statement in Java
+- Nested if-else Statements in Java
+- switch Statement in Java
+- switch vs. if-else in Java
+- if-else Statement (Exercise 1)
+- if-else Statement (Exercise 2)
+- The While Loop in Java
+- While Loop – Exercise
+- The Do While Loop in Java
+- The For Loop in Java
+- Nested Loops in Java
+- Break and Continue Keywords in Java
+- Loops in Java (Exercise 1)
+- Loops in Java (Exercise 2)
+- Loops in Java (Exercise 3)
+- Loops in Java (Exercise 4)
+- Loops in Java (Exercise 5)
+- Loops in Java (Exercise 6)
+- Loops in Java (Exercise 7)
+- Loops in Java (Exercise 8)
+- Loops in Java (Exercise 9)
+- Loops in Java (Exercise 10)
+- Loops in Java (Exercise 11)
+- Loops in Java (Exercise 12)
+- Loops in Java (Exercise 13)
+- Loops in Java (Exercise 14)
+- Scope and Local Variables in Java
+- Methods in Java
+- Passing Arguments by Value in Java
+- Passing Arguments by Reference in Java
+- Method Overloading in Java
+- Methods (Exercise 1)
+- Methods (Exercise 2)
+- Single-Dimensional Arrays in Java (Part 1)
+- Single-Dimensional Arrays in Java (Part 2)
+- The Arrays Class in Java (Part 1)
+- The Arrays Class in Java (Part 2)
+- The Arrays Class in Java (Part 3)
+- Variable-Length Argument Lists in Java
+- Arrays in Java (Exercise 1)
+- Arrays in Java (Exercise 2)
+- Arrays in Java (Exercise 3)
+- Arrays in Java (Exercise 4)
+- Arrays in Java (Exercise 5)
+- Two-Dimensional Arrays in Java (Part 1)
+- Two-Dimensional Arrays in Java (Part 2)
+- Two-Dimensional Arrays in Java (Part 3)
+- Two-Dimensional Arrays in Java (Exercise 1)
+- Two-Dimensional Arrays in Java (Exercise 2)
+- ArrayLists in Java (Part 1)
+- ArrayLists in Java (Part 2)
+- For Each Loop in Java
+- ArrayLists (Exercise 1)
+- ArrayLists (Exercise 2)
+- Introduction to Classes and Objects (Part 1)
+- Introduction to Classes and Objects (Part 2)
+- Creating a Class in Java
+- Instantiating Objects in Java
+- Constructors in Java
+- Creating a Class in Java - Practice
+- Static Variables and Static Methods in Java
+- Visibility Modifiers in Java
+- Data Field Encapsulation in Java
+- Visibility Modifiers and Encapsulation - Practice
+- Immutable Classes and Objects in Java
+- The this Keyword in Java
+- Inner Classes in Java
+- UML Class Diagram
+- Classes and Objects (Exercise 1)
+- Classes and Objects (Exercise 2) - Part 1
+- Classes and Objects (Exercise 2) - Part 2
+- Classes and Objects (Exercise 3)
+- Classes and Objects (Exercise 4)
+- Classes and Objects (Exercise 5)
+- Classes and Objects (Exercise 6)
+- Inheritance & Polymorphism | Chapter-8 | Java Programming | nesoacademy.org
+- Abstract Classes & Interfaces | Chapter-9 | Java Programming | nesoacademy.org
+- Exception Handling in Java | Chapter-9 | Java Programming | nesoacademy.org
+
+## Operating Systems
+- Introduction to Operating Systems
+- Basics of OS (Computer System Operation)
+- Basics of OS (Storage Structure)
+- Basics of OS (I/O Structure)
+- Computer System Architecture
+- Operating System Structure
+- Operating System Services
+- User Operating System Interface
+- System Calls
+- Types of System Calls
+- System Programs
+- Operating System Design & Implementation
+- Structures of Operating System
+- Virtual Machines
+- Operating System Generation and System Boot
+- Process Management (Processes and Threads)
+- Process State
+- Process Control Block
+- Process Scheduling
+- Context Switch
+- Operation on Processes – Process Creation
+- Operation on Processes – Process Termination
+- Interprocess Communication
+- Shared Memory Systems
+- Message Passing Systems (Part 1)
+- Message Passing Systems (Part 2)
+- Message Passing Systems (Part 3)
+- Sockets in Operating System
+- Remote Procedure Calls (RPC)
+- Issues in RPC & How They're Resolved
+- Introduction to Threads
+- Multithreading Models & Hyperthreading
+- fork() and exec() System Calls
+- Threading Issues [fork() & exec() System Calls]
+- Threading Issues (Thread Cancellation)
+- Introduction to CPU Scheduling
+- CPU and I/O Burst Cycles
+- Preemptive and Non-Preemptive Scheduling
+- Scheduling Criteria
+- Scheduling Algorithms - First Come First Served (FCFS)
+- First Come First Served Scheduling (Solved Problem 1)
+- First Come First Served Scheduling (Solved Problem 2)
+- Scheduling Algorithms - Shortest Job First (SJF)
+- Shortest Job First Scheduling (Solved Problem 1)
+- Shortest Job First Scheduling (Solved Problem 2)
+- Scheduling Algorithms - Priority Scheduling
+- Priority Scheduling (Solved Problem 1)
+- Priority Scheduling (Solved Problem 2)
+- Scheduling Algorithms - Round Robin Scheduling
+- Round Robin Scheduling (Turnaround Time & Waiting Time)
+- Round Robin Scheduling - Solved Problem (Part 1)
+- Round Robin Scheduling - Solved Problem (Part 2)
+- Multilevel Queue Scheduling Algorithm
+- Multilevel Feedback-Queue Scheduling Algorithm
+- Scheduling Algorithms – Solved Problems
+- Process Synchronization
+- The Critical-Section Problem
+- Peterson’s Solution
+- Test and Set Lock
+- Semaphores
+- Disadvantages of Semaphores
+- The Bounded Buffer Problem
+- The Readers Writers Problem
+- The Dining Philosophers Problem
+- Monitors
+- Dining Philosophers Solution using Monitors
+- Process Synchronization - Problem 1
+- Process Synchronization - Problem 2
+- Process Synchronization - Problem 3
+- Process Synchronization - Problem 4
+- Process Synchronization - Problem 5
+- Deadlocks | Chapter-7 | Operating System | nesoacademy.org
+- Main Memory | Chapter-8 | Operating System | nesoacademy.org
+- Virtual Memory | Chapter-9 | Operating System | nesoacademy.org
+- File Systems | Chapter-10 | Operating System | nesoacademy.org
+- File System Implementation | Chapter-11 | Operating System | nesoacademy.org
+- Mass Storage Structure | Chapter-12 | Operating System | nesoacademy.org
+
+## Python Programming
+- Introduction to Python Programming
+- The Definition of Python
+- What is a Compiler?
+- What is an Interpreter?
+- Compiled vs. Interpreted Languages
+- Is Python Compiled or Interpreted?
+- Python and Visual Studio Code Installation
+- Indentation in Python (Part 1)
+- Indentation in Python (Part 2)
+- Understanding Arithmetic Operators through REPL in Python
+- Basic Data Types in Python (Part 1)
+- Basic Data Types in Python (Part 2)
+- Variables in Python
+- Variable Naming Conventions in Python
+- Variables as Labels in Python
+- Strings in Python
+- Accessing String Characters in Python
+- String Operators in Python (Part 1)
+- String Operators in Python (Part 2)
+- String Operators in Python (Part 3)
+- String Slicing in Python (Part 1)
+- String Slicing in Python (Part 2)
+- String Formatting in Python (Part 1)
+- String Formatting in Python (Part 2)
+- String Methods in Python (Part 1)
+- String Methods in Python (Part 2)
+- String Methods in Python (Part 3)
+- String Methods in Python (Part 4)
+- String Methods in Python (Part 5)
+- String Methods in Python (Part 6)
+- String Methods in Python (Part 7)
+- String Methods in Python (Part 8)
+- Implicit Type Conversion in Python
+- Explicit Type Conversion in Python (Part 1)
+- Explicit Type Conversion in Python (Part 2)
+- Arithmetic Operators in Python
+- Precedence and Associativity of Arithmetic Operators
+- Comparison Operators in Python
+- Logical Operators in Python
+- Decimal to Binary and Binary to Decimal Conversion
+- Bitwise Operators in Python (Part 1)
+- Bitwise Operators in Python (Part 2)
+- Bitwise Right Shift Operator in Python
+- Bitwise Left Shift Operator in Python
+- Assignment Operators in Python
+- Membership Operators in Python
+- Identity Operators in Python (Part 1)
+- Identity Operators in Python (Part 2)
+- Expressions in Python (Part 1)
+- Expressions in Python (Part 2)
+- Statements in Python (Part 1)
+- Statements in Python (Part 2)
+- Comments in Python
+- Python Programming - Rapid Fire Quiz 1
+- Introduction to Lists in Python
+- Accessing Elements of a List in Python
+- Adding Elements to a List in Python
+- input() Method in Python
+- Input a List using Loops in Python
+- Input a List using split() Method in Python
+- Input a List using split() Method and Loops in Python
+- Changing List Items in Python
+- Removing List Items in Python
+- List Comprehension in Python
+- Python Programming - Rapid Fire Quiz 2
+- Introduction to Dictionaries in Python
+- Accessing Dictionary Items in Python
+- Changing and Adding Dictionary Items in Python
+- Removing Dictionary Items in Python
+- Copying a Dictionary in Python
+- Introduction to Tuples in Python
+- Accessing Tuple Items in Python
+- Updating a Tuple in Python
+- Unpacking a Tuple in Python
+- Python Programming - Rapid Fire Quiz 3
+- The if Statement in Python
+- The if-else Statement in Python
+- The if-elif-else Statement in Python
+- Logical AND with Conditionals in Python
+- Logical OR with Conditionals in Python
+- Logical NOT with Conditionals and Data Types in Python
+- The Basics of while Loop in Python
+- Conditionals and Loops - Program 1
+- The Infinite while Loop in Python
+- while Loop with else in Python
+- for Loop with range() Function in Python
+- Conditionals and Loops - Program 2
+- for Loop - Reversing a Range of Numbers
+- for Loop with Strings in Python
+- for Loop with Lists in Python
+- for Loop with Dictionaries in Python
+- for Loop with else in Python
+- break and continue Statements in Python
+- Nested for Loop in Python
+- Nested while Loop in Python
+- for Loop vs. while Loop in Python
+- Python Programming - Rapid Fire Quiz 4
+- Python Special Programs - Separating Even & Odd Numbers
+- Python Special Programs - Right Triangle Number Pattern
+- Python Special Programs - Multiplication Table Pattern
+- Python Special Programs - Full Pyramid of Stars
+- Python Special Programs - Right Pyramid of Stars
+- Python Special Programs - Sandglass Pattern of Stars
+- Python Special Programs - Pascal's Triangle
+- Python Special Programs - Armstrong Number
+- Python Special Programs - Fibonacci Sequence
+- Python Special Programs - Prime Number
+- Python Special Programs - Number Guessing Game
+- Python Special Programs - Counting Digits, Letters, and Special Characters
+- Basics of Regular Expressions
+- Python Special Programs - Password Validation
+- Python Special Programs - Palindromes
+- Python Special Programs - Finding HCF using Loops
+- Python Special Programs - Finding HCF using Euclidean Algorithm
+- Functions in Python | Chapter-8 | Python Programming | nesoacademy.org
+- Built-In Functions in Python | Chapter-9 | Python Programming | nesoacademy.org
+- Recursion in Python | Chapter 10 | Python Programming | nesoacademy.org
+- File Handling in Python | Chapter 11 | Python Programming | nesoacademy.org
+- Modules in Python | Chapter 12 | Python Programming | nesoacademy.org
+
