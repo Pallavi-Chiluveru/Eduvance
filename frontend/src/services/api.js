@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: import.meta.env.VITE_API_URL || '/api',
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ let csrfToken = null;
 async function ensureCsrfToken() {
     if (csrfToken) return csrfToken;
     try {
-        const res = await axios.get('/api/auth/csrf-token', { withCredentials: true });
+        const res = await api.get('/auth/csrf-token');
         csrfToken = res.data.data.csrfToken;
         return csrfToken;
     } catch {
@@ -83,10 +83,7 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const refreshRes = await axios.post('/api/auth/refresh', {}, {
-                    withCredentials: true,
-                    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
-                });
+                const refreshRes = await api.post('/auth/refresh', {});
                 const newToken = refreshRes.data.data.accessToken;
                 localStorage.setItem('accessToken', newToken);
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;

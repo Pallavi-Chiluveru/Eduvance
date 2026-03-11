@@ -1,62 +1,77 @@
-# Deployment Guide
+# 🚀 Deployment Guide
 
-This guide provides step-by-step instructions for deploying the DLSES project to Vercel and Render.
-
----
-
-## 🎨 Frontend Deployment (Vercel)
-
-Vercel is the best platform for React/Vite applications.
-
-1.  **Connect GitHub**: Log in to [Vercel](https://vercel.com) and click "Add New" > "Project".
-2.  **Import Repo**: Select your project repository.
-3.  **Configure Project**:
-    *   **Framework Preset**: Vite
-    *   **Root Directory**: `frontend`
-    *   **Build Command**: `npm run build`
-    *   **Output Directory**: `dist`
-4.  **Environment Variables**:
-    *   `VITE_API_URL`: Set this to your backend URL (e.g., `https://your-backend.onrender.com/api`)
-5.  **Deploy**: Click "Deploy".
+This guide provides step-by-step instructions for deploying the Eduvance project. We will deploy the **Backend to Render** and the **Frontend to Vercel**.
 
 ---
 
-## ⚙️ Backend Deployment (Render)
+## 1. ⚙️ Backend Deployment (Render)
 
-Render is a powerful and simple platform for Node.js APIs.
+Render will host your Node.js API.
 
-1.  **Create Web Service**: Log in to [Render](https://render.com) and click "New" > "Web Service".
-2.  **Connect Repo**: Connect your GitHub account and select your repository.
-3.  **Configure Service**:
+1.  **Login to Render**: Go to [dashboard.render.com](https://dashboard.render.com).
+2.  **Create New Web Service**: Click **New +** > **Web Service**.
+3.  **Connect GitHub**: Select your `Eduvance` repository.
+4.  **Configure Settings**:
+    *   **Name**: `eduvance-backend`
     *   **Root Directory**: `backend`
     *   **Runtime**: `Node`
     *   **Build Command**: `npm install`
     *   **Start Command**: `node server.js`
-4.  **Environment Variables**:
-    *   `PORT`: `5000`
-    *   `MONGO_URI`: Your MongoDB Atlas connection string.
-    *   `JWT_SECRET`: A secure random string for signing tokens.
-    *   `COOKIE_SECRET`: A secure random string for CSRF protection.
-    *   `CORS_ORIGIN`: Your Vercel frontend URL (e.g., `https://your-app.vercel.app`)
+5.  **Environment Variables**: Click **Advanced** > **Add Environment Variable**:
     *   `NODE_ENV`: `production`
-5.  **Deploy**: Click "Create Web Service".
+    *   `PORT`: `5000`
+    *   `MONGO_URI`: `your_mongodb_atlas_connection_string`
+    *   `JWT_SECRET`: `a_very_long_random_string`
+    *   `JWT_REFRESH_SECRET`: `another_long_random_string`
+    *   `GEMINI_API_KEY`: `your_gemini_api_key`
+    *   `CORS_ORIGIN`: `https://your-frontend.vercel.app` (You will get this from Vercel later)
+6.  **Deploy**: Click **Create Web Service**.
+
+> [!TIP]
+> Once deployed, copy your Render URL (e.g., `https://eduvance-backend.onrender.com`). You will need this for the Frontend.
 
 ---
 
-## 🗄️ Database Setup (MongoDB Atlas)
+## 2. 🎨 Frontend Deployment (Vercel)
 
-Ensure your MongoDB Atlas cluster allows connections from your deployment IPs.
-- **Network Access**: Add `0.0.0.0/0` (or the specific IPs provided by Render) to the IP Access List in Atlas.
-- **Database User**: Ensure the user in your connection string has read/write permissions.
+Vercel will host your React/Vite application.
+
+1.  **Login to Vercel**: Go to [vercel.com](https://vercel.com).
+2.  **Add New Project**: Click **Add New** > **Project**.
+3.  **Import Repo**: Select your `Eduvance` repository.
+4.  **Configure Project**:
+    *   **Framework Preset**: `Vite`
+    *   **Root Directory**: `frontend`
+5.  **Build & Output Settings**: (Defaults should be fine)
+    *   **Build Command**: `npm run build`
+    *   **Output Directory**: `dist`
+6.  **Environment Variables**:
+    *   `VITE_API_URL`: `https://your-backend.onrender.com/api` (Paste your Render URL here)
+7.  **Deploy**: Click **Deploy**.
 
 ---
 
-## 🐳 Docker Deployment
+## 3. 🏁 Finalizing (Fixing CORS)
 
-If you prefer using Docker for deployment (e.g., on a VPS or AWS), use the provided `docker-compose.yaml`:
+After the Frontend is deployed:
+1.  Copy your Vercel URL (e.g., `https://eduvance-frontend.vercel.app`).
+2.  Go back to your **Render Dashboard** > **Environment Variables**.
+3.  Update `CORS_ORIGIN` to your **Vercel URL**.
+4.  Render will automatically redeploy with the correct CORS settings.
 
-1.  Set up your `.env` variables on the host.
-2.  Run:
-    ```bash
-    docker-compose up -d --build
-    ```
+---
+
+## 🛠️ Local Commands for Git
+
+If you've made changes locally and need to push them before deploying:
+
+```powershell
+# Add all changes
+git add .
+
+# Commit
+git commit -m "chore: prepare for deployment (CORS and API URL config)"
+
+# Push to GitHub
+git push origin main
+```
