@@ -36,7 +36,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const allowedOrigin = (process.env.CORS_ORIGIN || 'http://localhost:5173').replace(/\/$/, '');
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map(o => o.trim().replace(/\/$/, ''));
 
 app.use(
     cors({
@@ -45,10 +47,15 @@ app.use(
             if (!origin) return callback(null, true);
             
             const sanitizedOrigin = origin.replace(/\/$/, '');
-            if (sanitizedOrigin === allowedOrigin) {
+            
+            // Check if origin is in allowed list or is a Vercel preview URL
+            const isAllowed = corsOrigins.includes(sanitizedOrigin) || 
+                             (process.env.NODE_ENV === 'production' && sanitizedOrigin.endsWith('.vercel.app'));
+
+            if (isAllowed) {
                 callback(null, true);
             } else {
-                console.warn(`CORS blocked for origin: ${origin}`);
+                console.warn(`❌ CORS blocked for origin: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
