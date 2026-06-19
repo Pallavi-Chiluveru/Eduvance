@@ -48,8 +48,11 @@ app.use(
             
             const sanitizedOrigin = origin.replace(/\/$/, '');
             
-            // Check if origin is in allowed list or is a Vercel preview URL
+            const isLocalhost = /^http:\/\/localhost:\d+$/.test(sanitizedOrigin);
+            
+            // Check if origin is in allowed list, is localhost, or is a Vercel preview URL
             const isAllowed = corsOrigins.includes(sanitizedOrigin) || 
+                             isLocalhost ||
                              (process.env.NODE_ENV === 'production' && sanitizedOrigin.endsWith('.vercel.app'));
 
             if (isAllowed) {

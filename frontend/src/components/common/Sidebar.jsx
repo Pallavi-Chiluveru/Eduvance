@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import logoImage from '../../assets/logo.png';
 import {
     HiOutlineHome,
     HiOutlineBookOpen,
@@ -18,6 +19,7 @@ import {
     HiOutlineX,
     HiOutlineBell,
     HiOutlineFire,
+    HiOutlineCode,
 } from 'react-icons/hi';
 
 const menuItems = {
@@ -30,6 +32,7 @@ const menuItems = {
         { label: 'Flashcards', path: '/student/flashcards', icon: HiOutlineLightBulb },
         { label: 'Rewards', path: '/student/rewards', icon: HiOutlineStar },
         { label: 'AI Assistant', path: '/student/chatbot', icon: HiOutlineChatAlt2 },
+        { label: 'DSA Arena ⭐', path: '/student/dsa-arena', icon: HiOutlineCode },
     ],
     teacher: [
         { label: 'Dashboard', path: '/teacher', icon: HiOutlineHome },
@@ -65,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }) {
             )}
 
             <aside
-                className={`fixed top-0 left-0 z-50 h-full transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 z-50 h-full flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 style={{
                     width: 'var(--sidebar-width)',
@@ -76,13 +79,24 @@ export default function Sidebar({ isOpen, onClose }) {
                 {/* Close button (mobile) */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 lg:hidden"
+                    className="absolute right-4 p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 lg:hidden"
                     style={{ top: 'calc(var(--navbar-height) + 8px)' }}
                 >
                     <HiOutlineX className="w-5 h-5" />
                 </button>
 
-                <nav className="flex flex-col gap-1 px-3 py-4 overflow-y-auto h-full">
+                {/* Logo Section */}
+                <div className="flex items-center justify-center pb-6 px-5 shrink-0 -mt-6">
+    <div className="bg-white rounded-2xl p-3 shadow-lg w-full flex items-center justify-center">
+        <img
+            src={logoImage}
+            alt="Eduvance Logo"
+            className="w-full h-auto max-h-20 object-contain"
+        />
+    </div>
+</div>
+
+                <nav className="flex flex-col gap-1 px-3 pb-4 overflow-y-auto flex-1">
                     {items.map((item) => (
                         <NavLink
                             key={item.path}

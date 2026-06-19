@@ -19,6 +19,28 @@ const path = require('path');
 /**
  * Helper: Update Student Daily Activity & Streak
  */
+/**
+ * Helper: Award a badge only if not already earned
+ */
+const checkAndAwardBadge = async (studentId, badge, title, description, xp = 0) => {
+    try {
+        const existing = await Reward.findOne({ student: studentId, badge });
+        if (!existing) {
+            await Reward.create({
+                student: studentId,
+                type: 'badge',
+                badge,
+                title,
+                description,
+                points: xp,
+                earnedAt: new Date(),
+            });
+        }
+    } catch (err) {
+        console.error('Error awarding badge:', err);
+    }
+};
+
 const updateDailyActivity = async (studentId, type, detail = '') => {
     try {
         const today = new Date();
@@ -70,6 +92,14 @@ const updateDailyActivity = async (studentId, type, detail = '') => {
             }
             user.lastActivityDate = today;
             await user.save();
+
+            // Award streak badges
+            if (user.learningStreak === 7) {
+                await checkAndAwardBadge(studentId, 'streak_7', '7-Day Streak! 🔥', 'Maintained a 7-day learning streak', 50);
+            }
+            if (user.learningStreak === 30) {
+                await checkAndAwardBadge(studentId, 'streak_30', '30-Day Streak! 🏆', 'Maintained a 30-day learning streak', 200);
+            }
         }
     } catch (err) {
         console.error('Error updating daily activity:', err);
@@ -84,13 +114,18 @@ exports.getDashboard = async (req, res, next) => {
     try {
         const studentId = req.user._id;
 
-        const [enrollments, submissions, attendanceRecords, rewards, notifications, assessments] = await Promise.all([
+        const [enrollments, submissions, attendanceRecords, rewards, notifications, assessments, results, flashcardsMastered] = await Promise.all([
             Enrollment.find({ student: studentId }).populate('course', 'name code'),
-            Submission.find({ student: studentId }),
+            Submission.find({ student: studentId }).populate({
+                path: 'assessment',
+                populate: { path: 'course', select: 'name' }
+            }),
             Attendance.find({ student: studentId }).sort('-date'),
             Reward.find({ student: studentId }),
             Notification.find({ user: studentId, isRead: false }).sort('-createdAt').limit(5),
             Assessment.find({ isPublished: true, isActive: true }).populate('course', 'name'),
+            Result.find({ student: studentId, isPassed: true }).populate({ path: 'assessment', populate: { path: 'course', select: 'code name' } }),
+            Flashcard.countDocuments({ student: studentId, interval: { $gt: 1 } })
         ]);
 
         // Calculate stats
@@ -112,22 +147,16 @@ exports.getDashboard = async (req, res, next) => {
         const completedCourses = enrollments.filter(e => e.progress >= 100).length;
 
         // Assessments logic
-        const enrolledCourseIds = enrollments.map(e => e.course._id.toString());
-        const attemptedAssessmentIds = submissions.map(s => s.assessment.toString());
+        // Assessments logic
 
-        // Pending assignments (Practice assessments not yet attempted)
-        const pendingAssignments = assessments.filter(a =>
-            a.type === 'practice' &&
-            enrolledCourseIds.includes(a.course._id.toString()) &&
-            !attemptedAssessmentIds.includes(a._id.toString())
-        ).length;
-
-        // Upcoming tests (Tests not yet attempted)
-        const upcomingTests = assessments.filter(a =>
-            (a.type === 'topic_test' || a.type === 'final') &&
-            enrolledCourseIds.includes(a.course._id.toString()) &&
-            !attemptedAssessmentIds.includes(a._id.toString())
-        ).length;
+        const assessmentsCompleted = results.length;
+        const assessmentsBySubject = {};
+        results.forEach(r => {
+            if (r.assessment && r.assessment.course) {
+                const subName = r.assessment.course.code || r.assessment.course.name.substring(0, 10);
+                assessmentsBySubject[subName] = (assessmentsBySubject[subName] || 0) + 1;
+            }
+        });
 
         // Current streak (consecutive days with activity)
         let currentStreak = 0;
@@ -175,8 +204,9 @@ exports.getDashboard = async (req, res, next) => {
                     totalPoints,
                     unreadNotifications: notifications.length,
                     completedCourses,
-                    pendingAssignments,
-                    upcomingTests,
+                    assessmentsCompleted,
+                    assessmentsBySubject,
+                    flashcardsMastered,
                     currentStreak,
                 },
                 recentCourses: enrollments,
@@ -281,10 +311,65 @@ exports.viewLecture = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Lecture not found' });
         }
 
+        // Find enrollment
+        const enrollment = await Enrollment.findOne({ student: req.user._id, course: lecture.course });
+        let newProgress = enrollment ? enrollment.progress : 0;
+
+        if (enrollment) {
+            // Check if already viewed
+            const alreadyViewed = enrollment.viewedLectures && enrollment.viewedLectures.some(id => id.toString() === lecture._id.toString());
+            
+            if (!alreadyViewed) {
+                if (!enrollment.viewedLectures) {
+                    enrollment.viewedLectures = [];
+                }
+                enrollment.viewedLectures.push(lecture._id);
+                
+                // Recalculate progress
+                const totalLectures = await Lecture.countDocuments({ course: lecture.course, isActive: true });
+                if (totalLectures > 0) {
+                    newProgress = Math.round((enrollment.viewedLectures.length / totalLectures) * 100);
+                    newProgress = Math.min(newProgress, 100); // Cap at 100
+                    enrollment.progress = newProgress;
+                }
+                
+                await enrollment.save();
+
+                // Award 5 XP for watching a new lecture
+                await Reward.create({
+                    student: req.user._id,
+                    type: 'points',
+                    title: 'Lecture Watched! 📚',
+                    description: `Watched: ${lecture.title}`,
+                    points: 5,
+                    course: lecture.course,
+                });
+
+                // Award course_complete badge if progress just hit 100%
+                if (newProgress >= 100) {
+                    await Reward.create({
+                        student: req.user._id,
+                        type: 'points',
+                        title: 'Course Completed! 🎓',
+                        description: 'Completed 100% of course lectures',
+                        points: 100,
+                        course: lecture.course,
+                    });
+                    await checkAndAwardBadge(
+                        req.user._id,
+                        'course_complete',
+                        'Course Champion 🎓',
+                        'Completed all lectures in a course',
+                        0
+                    );
+                }
+            }
+        }
+
         // Track activity
         await updateDailyActivity(req.user._id, 'lecture_view', `Watched lecture: ${lecture.title}`);
 
-        res.json({ success: true, message: 'Lecture view recorded' });
+        res.json({ success: true, message: 'Lecture view recorded', progress: newProgress });
     } catch (error) {
         next(error);
     }
@@ -322,8 +407,8 @@ exports.getLecturePDF = async (req, res, next) => {
  */
 exports.getAssessments = async (req, res, next) => {
     try {
-        const enrolled = await Enrollment.find({ student: req.user._id }).select('course');
-        const courseIds = enrolled.map((e) => e.course);
+        const enrolled = await Enrollment.find({ student: req.user._id }).populate('course', 'name teacher');
+        const courseIds = enrolled.map((e) => e.course ? e.course._id : null).filter(Boolean);
 
         const { type } = req.query;
         const filter = {
@@ -340,6 +425,50 @@ exports.getAssessments = async (req, res, next) => {
             }
         }
 
+        // Sync Comprehensive Assessments for enrolled courses if requested
+        if (type === 'final' || (!type && courseIds.length > 0)) {
+            for (const enrollment of enrolled) {
+                if (!enrollment.course) continue;
+                const courseId = enrollment.course._id;
+                const courseName = enrollment.course.name;
+                const teacherId = enrollment.course.teacher || req.user._id;
+
+                let finalAssessment = await Assessment.findOne({ course: courseId, type: 'final' });
+                
+                const topicAssessments = await Assessment.find({ course: courseId, type: { $ne: 'final' } });
+                const topicAssessmentIds = topicAssessments.map(a => a._id);
+                const questions = await Question.find({ assessment: { $in: topicAssessmentIds } });
+                
+                const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
+                const duration = questions.length * 2 || 60;
+                const expectedTitle = `${courseName} - Comprehensive Subject Assessment`;
+                
+                if (!finalAssessment) {
+                    finalAssessment = await Assessment.create({
+                        title: expectedTitle,
+                        course: courseId,
+                        type: 'final',
+                        description: 'Full syllabus assessment covering all topics.',
+                        totalMarks: totalMarks,
+                        passingMarks: Math.floor(totalMarks * 0.5),
+                        duration: duration,
+                        maxAttempts: 999,
+                        createdBy: teacherId,
+                        isPublished: true,
+                        isActive: true
+                    });
+                } else {
+                    if (finalAssessment.totalMarks !== totalMarks || finalAssessment.duration !== duration || finalAssessment.title !== expectedTitle) {
+                        finalAssessment.totalMarks = totalMarks;
+                        finalAssessment.passingMarks = Math.floor(totalMarks * 0.5);
+                        finalAssessment.duration = duration;
+                        finalAssessment.title = expectedTitle;
+                        await finalAssessment.save();
+                    }
+                }
+            }
+        }
+
         const assessments = await Assessment.find(filter)
             .populate('course', 'name code')
             .sort('-createdAt');
@@ -348,29 +477,43 @@ exports.getAssessments = async (req, res, next) => {
         const submissions = await Submission.find({ student: req.user._id }).sort('-createdAt');
         const submissionMap = {};
         const statsMap = {};
+        const bestScoreMap = {};
 
         submissions.forEach((s) => {
             const aid = s.assessment.toString();
-            // Count attempts
-            submissionMap[aid] = (submissionMap[aid] || 0) + 1;
-            // Store latest stats (since we sorted by -createdAt, the first one encountered is the latest)
-            if (statsMap[aid] === undefined) {
-                statsMap[aid] = {
-                    percentage: s.percentage,
-                    id: s._id,
-                    obtained: s.totalMarks,
-                    // If we have access to assessment possible marks here it's better, 
-                    // but we'll use a's totalMarks during mapping.
-                };
+            // Only count and track stats for submitted or graded submissions
+            if (s.status === 'submitted' || s.status === 'graded') {
+                // Count attempts
+                submissionMap[aid] = (submissionMap[aid] || 0) + 1;
+                
+                // Store latest stats (since we sorted by -createdAt, the first one encountered is the latest completed)
+                if (statsMap[aid] === undefined) {
+                    statsMap[aid] = {
+                        percentage: s.percentage,
+                        id: s._id,
+                        obtained: s.totalMarks,
+                    };
+                }
+                
+                // Store best score
+                if (bestScoreMap[aid] === undefined || s.totalMarks > bestScoreMap[aid].obtained) {
+                    bestScoreMap[aid] = {
+                        obtained: s.totalMarks,
+                        percentage: s.percentage,
+                    };
+                }
             }
         });
 
         const data = assessments.map((a) => ({
             ...a.toObject(),
+            maxAttempts: a.type === 'final' ? a.maxAttempts : 3,
             attempts: submissionMap[a._id.toString()] || 0,
             latestScore: statsMap[a._id.toString()]?.percentage,
             latestSubmissionId: statsMap[a._id.toString()]?.id,
             obtainedMarks: statsMap[a._id.toString()]?.obtained,
+            bestScore: bestScoreMap[a._id.toString()]?.obtained,
+            bestPercentage: bestScoreMap[a._id.toString()]?.percentage,
         }));
 
         res.json({ success: true, data: { assessments: data } });
@@ -389,7 +532,14 @@ exports.getAssessmentQuestions = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
-        let questions = await Question.find({ assessment: assessment._id }).sort('order');
+        let questions;
+        if (assessment.type === 'final') {
+            const topicAssessments = await Assessment.find({ course: assessment.course._id || assessment.course, type: { $ne: 'final' } });
+            const topicAssessmentIds = topicAssessments.map(a => a._id);
+            questions = await Question.find({ assessment: { $in: topicAssessmentIds } }).sort('order');
+        } else {
+            questions = await Question.find({ assessment: assessment._id }).sort('order');
+        }
 
         // Hide correct answers for MCQ during test
         questions = questions.map((q) => {
@@ -419,6 +569,50 @@ exports.getAssessmentQuestions = async (req, res, next) => {
 };
 
 /**
+ * POST /api/student/start-test
+ */
+exports.startTest = async (req, res, next) => {
+    try {
+        const { assessmentId } = req.body;
+        const assessment = await Assessment.findById(assessmentId);
+        if (!assessment) {
+            return res.status(404).json({ success: false, message: 'Assessment not found' });
+        }
+
+        const prevAttempts = await Submission.countDocuments({
+            student: req.user._id,
+            assessment: assessmentId,
+            status: { $in: ['submitted', 'graded'] }
+        });
+        
+        const maxAllowedAttempts = assessment.type === 'final' ? assessment.maxAttempts : 3;
+        if (prevAttempts >= maxAllowedAttempts) {
+            return res.status(400).json({ success: false, message: 'Maximum attempts reached' });
+        }
+
+        let submission = await Submission.findOne({
+            student: req.user._id,
+            assessment: assessmentId,
+            status: 'in_progress'
+        });
+
+        if (!submission) {
+            submission = await Submission.create({
+                student: req.user._id,
+                assessment: assessmentId,
+                status: 'in_progress',
+                startedAt: new Date(),
+                attemptNumber: prevAttempts + 1
+            });
+        }
+
+        res.json({ success: true, data: { startedAt: submission.startedAt, duration: assessment.duration } });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * POST /api/student/submit-test
  */
 exports.submitTest = async (req, res, next) => {
@@ -430,17 +624,32 @@ exports.submitTest = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Assessment not found' });
         }
 
-        // Check attempt limit
-        const prevAttempts = await Submission.countDocuments({
+        let submission = await Submission.findOne({
             student: req.user._id,
             assessment: assessmentId,
+            status: 'in_progress'
         });
-        if (prevAttempts >= assessment.maxAttempts) {
-            return res.status(400).json({ success: false, message: 'Maximum attempts reached' });
+
+        if (!submission) {
+             return res.status(400).json({ success: false, message: 'No active test found. Please start the test first.' });
+        }
+
+        // Validate time
+        const elapsedMs = Date.now() - new Date(submission.startedAt).getTime();
+        const allowedMs = (assessment.duration * 60 * 1000) + 60000; // 60s grace period
+        
+        if (elapsedMs > allowedMs + 300000) { // Reject if more than 5 minutes past grace
+            return res.status(400).json({ success: false, message: 'Test time has expired.' });
         }
 
         // Fetch questions for auto-grading MCQs
-        const questions = await Question.find({ assessment: assessmentId });
+        let questions;
+        if (assessment.type === 'final') {
+            const topicAssessments = await Assessment.find({ course: assessment.course, type: { $ne: 'final' } });
+            questions = await Question.find({ assessment: { $in: topicAssessments.map(a => a._id) } });
+        } else {
+            questions = await Question.find({ assessment: assessmentId });
+        }
         const questionMap = {};
         questions.forEach((q) => {
             questionMap[q._id.toString()] = q;
@@ -474,20 +683,19 @@ exports.submitTest = async (req, res, next) => {
             };
         });
 
-        const percentage = Math.round((totalObtained / assessment.totalMarks) * 100);
+        const percentage = assessment.totalMarks > 0 
+            ? Math.round((totalObtained / assessment.totalMarks) * 100) 
+            : 0;
 
         const hasDescriptive = questions.some((q) => q.type === 'descriptive');
 
-        const submission = await Submission.create({
-            student: req.user._id,
-            assessment: assessmentId,
-            answers: gradedAnswers,
-            totalMarks: totalObtained,
-            percentage,
-            status: hasDescriptive ? 'submitted' : 'graded',
-            timeTaken,
-            attemptNumber: prevAttempts + 1,
-        });
+        submission.answers = gradedAnswers;
+        submission.totalMarks = totalObtained;
+        submission.percentage = percentage;
+        submission.status = hasDescriptive ? 'submitted' : 'graded';
+        submission.timeTaken = timeTaken || Math.floor(elapsedMs / 1000);
+        submission.submittedAt = new Date();
+        await submission.save();
 
         // Create result if fully graded (all MCQ)
         if (!hasDescriptive) {
@@ -502,19 +710,30 @@ exports.submitTest = async (req, res, next) => {
             });
         }
 
-        // --- NEW: Track Activity & Streak ---
+        // --- Track Activity & Streak ---
         await updateDailyActivity(req.user._id, 'quiz_submit', `Submitted quiz: ${assessment.title}`);
 
-        // Award points
-        if (percentage >= 80) {
+        // Award XP for passing
+        if (totalObtained >= assessment.passingMarks) {
             await Reward.create({
                 student: req.user._id,
                 type: 'points',
-                title: 'High Score!',
+                title: percentage === 100 ? 'Perfect Score! 🌟' : percentage >= 90 ? 'Excellent Score! 🥇' : percentage >= 80 ? 'High Score! 🥈' : 'Quiz Passed! ✅',
                 description: `Scored ${percentage}% on ${assessment.title}`,
-                points: percentage >= 90 ? 50 : 30,
+                points: percentage === 100 ? 70 : percentage >= 90 ? 50 : percentage >= 80 ? 30 : 10,
                 course: assessment.course,
             });
+        }
+
+        // Award perfect_score badge on 100%
+        if (percentage === 100) {
+            await checkAndAwardBadge(
+                req.user._id,
+                'perfect_score',
+                'Perfect Score! 🌟',
+                `Achieved 100% on ${assessment.title}`,
+                20
+            );
         }
 
         res.json({
@@ -540,13 +759,19 @@ exports.getSubmissionReview = async (req, res, next) => {
         const submission = await Submission.findOne({
             _id: req.params.id,
             student: req.user._id,
-        }).populate('assessment', 'title type totalMarks passingMarks');
+        }).populate('assessment', 'title type totalMarks passingMarks course');
 
         if (!submission) {
             return res.status(404).json({ success: false, message: 'Submission not found' });
         }
 
-        const questions = await Question.find({ assessment: submission.assessment._id }).sort('order');
+        let questions;
+        if (submission.assessment.type === 'final') {
+            const topicAssessments = await Assessment.find({ course: submission.assessment.course, type: { $ne: 'final' } });
+            questions = await Question.find({ assessment: { $in: topicAssessments.map(a => a._id) } }).sort('order');
+        } else {
+            questions = await Question.find({ assessment: submission.assessment._id }).sort('order');
+        }
         const questionMap = {};
         questions.forEach((q) => {
             questionMap[q._id.toString()] = q;
@@ -721,6 +946,17 @@ exports.createFlashcard = async (req, res, next) => {
             front,
             back,
         });
+
+        // Award 2 XP for creating a flashcard
+        await Reward.create({
+            student: req.user._id,
+            type: 'points',
+            title: 'Flashcard Created! 🗂️',
+            description: `Created a new flashcard: "${front.substring(0, 30)}..."`,
+            points: 2,
+            course: course || undefined,
+        });
+
         res.status(201).json({ success: true, data: { flashcard } });
     } catch (error) {
         next(error);
@@ -756,6 +992,16 @@ exports.reviewFlashcard = async (req, res, next) => {
         card.nextReview = new Date(Date.now() + interval * 24 * 60 * 60 * 1000);
 
         await card.save();
+
+        // Award 1 XP for reviewing a flashcard
+        await Reward.create({
+            student: req.user._id,
+            type: 'points',
+            title: 'Flashcard Reviewed! 🔁',
+            description: 'Completed a spaced repetition review',
+            points: 1,
+        });
+
         res.json({ success: true, data: { flashcard: card } });
     } catch (error) {
         next(error);

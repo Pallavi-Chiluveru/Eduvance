@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { uploadToCloudinary } = require('../utils/cloudinary');
 
 /**
  * GET /api/:role/profile
@@ -80,6 +81,37 @@ exports.changePassword = async (req, res, next) => {
         res.json({
             success: true,
             message: 'Password changed successfully',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * PUT /api/:role/profile/avatar
+ * Upload and update user avatar
+ */
+exports.uploadAvatar = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload an image file',
+            });
+        }
+
+        const avatarUrl = await uploadToCloudinary(req.file.path, 'avatars');
+
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            { avatar: avatarUrl },
+            { new: true, runValidators: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Avatar updated successfully',
+            data: { user },
         });
     } catch (error) {
         next(error);

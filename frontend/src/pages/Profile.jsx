@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -10,6 +10,8 @@ export default function Profile() {
     const [loading, setLoading] = useState(false);
     const [editing, setEditing] = useState(false);
     const [changingPassword, setChangingPassword] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const avatarInputRef = useRef(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -45,6 +47,37 @@ export default function Profile() {
 
     const handlePasswordChange = (e) => {
         setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    };
+
+    const handleAvatarChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error('Please select a valid image file (JPG, PNG, GIF, WEBP)');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be under 5MB');
+            return;
+        }
+
+        setUploadingAvatar(true);
+        try {
+            const data = new FormData();
+            data.append('avatar', file);
+            await api.put(`/${user.role}/profile/avatar`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            toast.success('Profile picture updated!');
+            await loadUser();
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to upload image');
+        } finally {
+            setUploadingAvatar(false);
+            if (avatarInputRef.current) avatarInputRef.current.value = '';
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -104,13 +137,38 @@ export default function Profile() {
                 <div className="flex items-start gap-6">
                     {/* Avatar */}
                     <div className="relative">
-                        <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center">
-                            <span className="text-white text-3xl font-bold">
-                                {user.firstName?.[0]}{user.lastName?.[0]}
-                            </span>
+                        <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center overflow-hidden">
+                            {user.avatar ? (
+                                <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-white text-3xl font-bold">
+                                    {user.firstName?.[0]}{user.lastName?.[0]}
+                                </span>
+                            )}
                         </div>
-                        <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center hover:bg-indigo-600 transition-colors">
-                            <HiOutlineCamera className="w-4 h-4" />
+                        {/* Hidden file input */}
+                        <input
+                            ref={avatarInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
+                            className="hidden"
+                            onChange={handleAvatarChange}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => avatarInputRef.current?.click()}
+                            disabled={uploadingAvatar}
+                            title="Change profile picture"
+                            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center hover:bg-indigo-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            {uploadingAvatar ? (
+                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
+                            ) : (
+                                <HiOutlineCamera className="w-4 h-4" />
+                            )}
                         </button>
                     </div>
 
@@ -226,52 +284,7 @@ export default function Profile() {
                             />
                         </div>
 
-                        {user.role === 'student' && (
-                            <>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                                        Student ID
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="studentId"
-                                        value={formData.studentId}
-                                        onChange={handleChange}
-                                        disabled
-                                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none opacity-60 cursor-not-allowed"
-                                        style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                                    />
-                                </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                                        Grade
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="grade"
-                                        value={formData.grade}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                                        style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                                        Section
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="section"
-                                        value={formData.section}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                                        style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                                    />
-                                </div>
-                            </>
-                        )}
                     </div>
 
                     <div className="flex gap-3 pt-4">

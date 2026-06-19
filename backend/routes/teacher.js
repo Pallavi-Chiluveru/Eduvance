@@ -13,6 +13,7 @@ router.use(protect, authorize('teacher'));
 router.get('/profile', profileController.getProfile);
 router.put('/profile', profileController.updateProfile);
 router.put('/change-password', profileController.changePassword);
+router.put('/profile/avatar', upload.single('avatar'), profileController.uploadAvatar);
 
 router.get('/dashboard', teacherController.getDashboard);
 router.get('/courses', teacherController.getCourses);

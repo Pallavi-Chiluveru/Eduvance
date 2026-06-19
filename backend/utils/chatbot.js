@@ -5,10 +5,10 @@
 
 const axios = require('axios');
 
-// Using a reliable chat model on the HF router
-const MODEL_NAME = 'Qwen/Qwen2.5-72B-Instruct';
-const API_URL = 'https://router.huggingface.co/v1/chat/completions';
-const API_KEY = process.env.HUGGINGFACE_API_KEY;
+// Using a fast model on Groq
+const MODEL_NAME = 'llama-3.1-8b-instant';
+const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const API_KEY = process.env.GROQ_API_KEY;
 
 // Rule-based fallback for common queries
 const knowledgeBase = [
@@ -139,7 +139,7 @@ const generateAIResponse = async (message) => {
             isAI: true,
         };
     } catch (error) {
-        console.error('Hugging Face AI Error:', error.response?.data || error.message);
+        console.error('Groq AI Error:', error.response?.data || error.message);
         return null;
     }
 };

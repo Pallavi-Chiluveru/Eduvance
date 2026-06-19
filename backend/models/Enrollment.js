@@ -28,6 +28,10 @@ const enrollmentSchema = new mongoose.Schema(
             max: 100,
         },
         completedChapters: [String],
+        viewedLectures: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Lecture'
+        }],
     },
     { timestamps: true }
 );

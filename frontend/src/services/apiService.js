@@ -18,6 +18,7 @@ export const studentAPI = {
     getLectures: (courseId) => api.get(`/student/courses/${courseId}/lectures`),
     getAssessments: (params) => api.get('/student/assessments', { params }),
     getQuestions: (assessmentId) => api.get(`/student/assessments/${assessmentId}/questions`),
+    startTest: (data) => api.post('/student/start-test', data),
     submitTest: (data) => api.post('/student/submit-test', data),
     getSubmissionReview: (id) => api.get(`/student/submissions/${id}/review`),
     getPerformance: () => api.get('/student/performance'),

@@ -1,9 +1,9 @@
 const axios = require('axios');
 require('dotenv').config();
 
-const API_KEY = process.env.HUGGINGFACE_API_KEY;
-const MODEL_NAME = 'Qwen/Qwen2.5-72B-Instruct';
-const API_URL = 'https://router.huggingface.co/v1/chat/completions';
+const API_KEY = process.env.GROQ_API_KEY;
+const MODEL_NAME = 'llama-3.1-8b-instant';
+const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 async function finalTest() {
     console.log("=================================");

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import Logo from '../components/common/Logo';
+import { FaSun, FaMoon } from 'react-icons/fa';
 
 export default function Login() {
     const { login } = useAuth();
@@ -10,6 +11,31 @@ export default function Login() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(true);
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setIsDarkMode(false);
+            document.documentElement.classList.remove('dark');
+        } else {
+            setIsDarkMode(true);
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        if (isDarkMode) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            setIsDarkMode(false);
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            setIsDarkMode(true);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,70 +55,50 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' }}>
-            {/* Animated Background Orbs */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -left-40 w-80 h-80 bg-white/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-                <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
-                <div className="absolute -bottom-40 left-1/3 w-80 h-80 bg-indigo-500/25 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '2s' }} />
+        <div className="min-h-screen flex relative overflow-hidden bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-500 selection:bg-indigo-500 selection:text-white">
+            
+            {/* Theme Toggle Button */}
+            <div className="absolute top-6 right-6 z-50 animate-fade-in">
+                <button 
+                    onClick={toggleTheme}
+                    className="p-3 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-lg text-slate-700 dark:text-yellow-300 hover:scale-110 transition-all duration-300 focus:outline-none"
+                    aria-label="Toggle Theme"
+                >
+                    {isDarkMode ? <FaSun className="text-xl" /> : <FaMoon className="text-xl text-indigo-600" />}
+                </button>
             </div>
 
-            {/* Left Panel - Enhanced Branding */}
-            <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 relative">
-                <div className="text-white text-center relative z-10 max-w-lg animate-slide-up">
-                    <div className="mb-10 flex justify-center">
-                        <Logo size="2xl" variant="light" className="hover:scale-105 transition-transform duration-500" />
-                    </div>
+            {/* Background Glowing Orbs */}
+            <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500 dark:bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[120px] opacity-30 dark:opacity-40 animate-pulse pointer-events-none transition-opacity duration-500"></div>
+            <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 dark:bg-purple-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[120px] opacity-30 dark:opacity-40 animate-pulse pointer-events-none transition-opacity duration-500" style={{ animationDelay: '2s' }}></div>
+            <div className="fixed top-[40%] left-[40%] w-[20%] h-[20%] bg-cyan-400 dark:bg-cyan-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-20 pointer-events-none transition-opacity duration-500"></div>
 
-                    <h1 className="text-5xl font-extrabold mb-6 tracking-tight"></h1>
-                    <p className="text-xl text-white/90 mb-4 font-medium">Digital Learning Support and Evaluation System</p>
-                    <p className="text-base text-white/70 leading-relaxed max-w-md mx-auto mb-10">
-                        A comprehensive platform connecting students, teachers, parents, and administrators for enhanced educational experiences.
-                    </p>
-
-                    <div className="mt-12 grid grid-cols-2 gap-4">
-                        {[
-                            { icon: '📚', n: '9', d: 'Courses' },
-                            { icon: '👥', n: '4', d: 'User Roles' },
-                            { icon: '📝', n: '∞', d: 'Tests' },
-                            { icon: '🤖', n: 'AI', d: 'Assistant' },
-                        ].map((f) => (
-                            <div
-                                key={f.d}
-                                className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:bg-white/15 transition-all duration-300 hover:scale-105 group"
-                            >
-                                <div className="text-2xl mb-1 group-hover:scale-110 transition-transform">{f.icon}</div>
-                                <p className="text-xl font-bold">{f.n} {f.d}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Right Panel - Premium Form */}
-            <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative">
+            {/* Centered Premium Form */}
+            <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10">
                 <div className="w-full max-w-md animate-slide-up">
-                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 lg:p-10 border border-white/20">
+                    <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] p-8 lg:p-10 border border-white/50 dark:border-slate-700/50 relative overflow-hidden group">
+                        
+                        {/* Inner glowing highlight */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+
                         <div className="lg:hidden text-center mb-10">
-                            <Logo size="lg" className="justify-center" variant="dark" />
+                            <Logo size="lg" className="justify-center" variant={isDarkMode ? 'light' : 'dark'} />
                         </div>
 
-                        <div className="text-center mb-8">
-                            <h2 className="text-3xl font-extrabold mb-2 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                        <div className="text-center mb-8 relative z-10">
+                            <h2 className="text-3xl font-extrabold mb-2 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent drop-shadow-sm">
                                 Welcome Back
                             </h2>
-                            <p className="text-base" style={{ color: 'var(--text-muted)' }}>
+                            <p className="text-base text-slate-500 dark:text-slate-400">
                                 Sign in to continue your learning journey
                             </p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
                             {error && (
-                                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-xl animate-shake">
+                                <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 rounded-xl animate-shake backdrop-blur-sm">
                                     <div className="flex">
-                                        <div className="flex-shrink-0 text-red-500">
-                                            ⚠️
-                                        </div>
+                                        <div className="flex-shrink-0 text-red-500">⚠️</div>
                                         <div className="ml-3">
                                             <p className="text-sm font-bold text-red-800 dark:text-red-200">
                                                 {error}
@@ -102,8 +108,8 @@ export default function Login() {
                                 </div>
                             )}
 
-                            <div className="group">
-                                <label className="block text-sm font-bold mb-2 transition-colors" style={{ color: 'var(--text-secondary)' }}>
+                            <div className="group/input">
+                                <label className="block text-sm font-bold mb-2 transition-colors text-slate-600 dark:text-slate-300">
                                     📧 Email Address
                                 </label>
                                 <input
@@ -111,18 +117,13 @@ export default function Login() {
                                     required
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:scale-[1.02] hover:shadow-md"
-                                    style={{
-                                        background: 'var(--bg-tertiary)',
-                                        border: '2px solid var(--border-color)',
-                                        color: 'var(--text-primary)',
-                                    }}
+                                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500 focus:scale-[1.02] hover:shadow-md bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                                     placeholder="you@example.com"
                                 />
                             </div>
 
-                            <div className="group">
-                                <label className="block text-sm font-bold mb-2 transition-colors" style={{ color: 'var(--text-secondary)' }}>
+                            <div className="group/input">
+                                <label className="block text-sm font-bold mb-2 transition-colors text-slate-600 dark:text-slate-300">
                                     🔒 Password
                                 </label>
                                 <input
@@ -130,12 +131,7 @@ export default function Login() {
                                     required
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:scale-[1.02] hover:shadow-md"
-                                    style={{
-                                        background: 'var(--bg-tertiary)',
-                                        border: '2px solid var(--border-color)',
-                                        color: 'var(--text-primary)',
-                                    }}
+                                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500 focus:scale-[1.02] hover:shadow-md bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -143,9 +139,9 @@ export default function Login() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="relative w-full py-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 hover:scale-[1.02] active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl overflow-hidden group"
+                                className="relative w-full py-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(124,58,237,0.3)] hover:shadow-[0_0_25px_rgba(124,58,237,0.6)] overflow-hidden group/btn mt-4"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
                                 <div className="relative flex items-center justify-center gap-2">
                                     {loading && <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />}
                                     {loading ? 'Signing in...' : '✨ Sign In'}
@@ -153,18 +149,18 @@ export default function Login() {
                             </button>
                         </form>
 
-                        <p className="mt-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+                        <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400 relative z-10">
                             Don't have an account?{' '}
                             <Link
                                 to="/register"
-                                className="font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent hover:from-purple-700 hover:to-indigo-700 transition-all"
+                                className="font-bold bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent hover:from-purple-700 dark:hover:from-purple-300 hover:to-indigo-700 dark:hover:to-indigo-300 transition-all drop-shadow-sm"
                             >
                                 Sign up now →
                             </Link>
                         </p>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-center gap-6 text-white/80 text-xs">
+                    <div className="mt-6 flex items-center justify-center gap-6 text-slate-600 dark:text-white/60 text-xs">
                         <div className="flex items-center gap-1">
                             <span>🔒</span>
                             <span>Secure Login</span>
@@ -182,28 +178,6 @@ export default function Login() {
             </div>
 
             <style>{`
-                @keyframes spin-slow {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                @keyframes reverse-spin {
-                    from { transform: rotate(360deg); }
-                    to { transform: rotate(0deg); }
-                }
-                .animate-spin-slow {
-                    animation: spin-slow 12s linear infinite;
-                }
-                .animate-reverse-spin {
-                    animation: reverse-spin 8s linear infinite;
-                }
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px) translateX(0px); }
-                    33% { transform: translateY(-20px) translateX(10px); }
-                    66% { transform: translateY(10px) translateX(-10px); }
-                }
-                .animate-float {
-                    animation: float 6s ease-in-out infinite;
-                }
                 @keyframes shake {
                     0%, 100% { transform: translateX(0); }
                     25% { transform: translateX(-5px); }

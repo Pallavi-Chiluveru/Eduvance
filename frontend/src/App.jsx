@@ -5,6 +5,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import DashboardLayout from './components/common/DashboardLayout';
 
 // Pages
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -18,6 +19,7 @@ import StudentFlashcards from './pages/student/Flashcards';
 import StudentRewards from './pages/student/Rewards';
 import StudentChatbot from './pages/student/Chatbot';
 import StudentNotifications from './pages/student/Notifications';
+import StudentDSAArena from './pages/student/DSAArena';
 
 import TeacherDashboard from './pages/teacher/Dashboard';
 import TeacherCourses from './pages/teacher/Courses';
@@ -57,7 +59,7 @@ export default function App() {
           {/* Public */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Home />} />
 
           {/* Student routes */}
           <Route
@@ -77,6 +79,7 @@ export default function App() {
             <Route path="/student/rewards" element={<StudentRewards />} />
             <Route path="/student/chatbot" element={<StudentChatbot />} />
             <Route path="/student/notifications" element={<StudentNotifications />} />
+            <Route path="/student/dsa-arena" element={<StudentDSAArena />} />
             <Route path="/student/profile" element={<Profile />} />
           </Route>
 

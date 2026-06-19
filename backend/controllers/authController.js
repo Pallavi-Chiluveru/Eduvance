@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Reward = require('../models/Reward');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../config/jwt');
 
 // Cookie options for refresh token
@@ -16,7 +17,7 @@ const refreshCookieOptions = {
  */
 exports.register = async (req, res, next) => {
     try {
-        const { firstName, lastName, email, password, role, phone, studentId, grade, section } = req.body;
+        const { firstName, lastName, email, password, role, phone } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -24,17 +25,52 @@ exports.register = async (req, res, next) => {
             return res.status(409).json({ success: false, message: 'Email already registered' });
         }
 
-        const user = await User.create({
-            firstName,
-            lastName,
-            email,
-            password,
-            role,
-            phone,
-            studentId,
-            grade,
-            section,
-        });
+        let user;
+        let retries = 0;
+        const maxRetries = 3;
+
+        while (retries < maxRetries) {
+            try {
+                let generatedStudentId = undefined;
+                
+                if (role === 'student') {
+                    const studentsWithId = await User.find({ role: 'student', studentId: { $exists: true } }, 'studentId');
+                    let maxId = 0;
+                    studentsWithId.forEach(s => {
+                        if (s.studentId && s.studentId.startsWith('STU')) {
+                            const numPart = parseInt(s.studentId.replace('STU', ''), 10);
+                            if (!isNaN(numPart) && numPart > maxId) {
+                                maxId = numPart;
+                            }
+                        }
+                    });
+                    generatedStudentId = `STU${(maxId + 1).toString().padStart(3, '0')}`;
+                }
+
+                user = await User.create({
+                    firstName,
+                    lastName,
+                    email,
+                    password,
+                    role,
+                    phone,
+                    studentId: generatedStudentId,
+                });
+                
+                break; // Successfully created user, exit loop
+            } catch (error) {
+                // If there's a collision on studentId, retry
+                if (error.code === 11000 && error.keyPattern && error.keyPattern.studentId) {
+                    retries++;
+                    if (retries === maxRetries) {
+                        return res.status(500).json({ success: false, message: 'Failed to generate unique student ID. Please try again.' });
+                    }
+                } else {
+                    // Throw other errors (like validation errors or duplicate email if any)
+                    throw error;
+                }
+            }
+        }
 
         // Generate tokens
         const payload = { id: user._id, role: user.role };
@@ -103,6 +139,22 @@ exports.login = async (req, res, next) => {
         await user.save({ validateBeforeSave: false });
 
         res.cookie('refreshToken', refreshToken, refreshCookieOptions);
+
+        // Award first_login badge for students
+        if (user.role === 'student') {
+            const existing = await Reward.findOne({ student: user._id, badge: 'first_login' });
+            if (!existing) {
+                await Reward.create({
+                    student: user._id,
+                    type: 'badge',
+                    badge: 'first_login',
+                    title: 'Welcome! 👋',
+                    description: 'Logged in for the first time',
+                    points: 10,
+                    earnedAt: new Date(),
+                });
+            }
+        }
 
         res.json({
             success: true,

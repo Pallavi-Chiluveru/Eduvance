@@ -3,6 +3,7 @@ const studentController = require('../controllers/studentController');
 const profileController = require('../controllers/profileController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/roleCheck');
+const upload = require('../utils/fileUpload');
 
 // All student routes require authentication + student role
 router.use(protect, authorize('student'));
@@ -11,6 +12,7 @@ router.use(protect, authorize('student'));
 router.get('/profile', profileController.getProfile);
 router.put('/profile', profileController.updateProfile);
 router.put('/change-password', profileController.changePassword);
+router.put('/profile/avatar', upload.single('avatar'), profileController.uploadAvatar);
 
 router.get('/dashboard', studentController.getDashboard);
 router.get('/courses', studentController.getCourses);
@@ -21,6 +23,7 @@ router.get('/lectures/:lectureId/pdf', studentController.getLecturePDF);
 router.post('/view-lecture/:id', studentController.viewLecture);
 router.get('/assessments', studentController.getAssessments);
 router.get('/assessments/:id/questions', studentController.getAssessmentQuestions);
+router.post('/start-test', studentController.startTest);
 router.post('/submit-test', studentController.submitTest);
 router.get('/submissions/:id/review', studentController.getSubmissionReview);
 router.get('/performance', studentController.getPerformance);

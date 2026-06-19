@@ -4,6 +4,7 @@ const profileController = require('../controllers/profileController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/roleCheck');
 const { createCourseValidation, validate, mongoIdParam } = require('../middleware/validation');
+const upload = require('../utils/fileUpload');
 
 router.use(protect, authorize('admin'));
 
@@ -11,6 +12,7 @@ router.use(protect, authorize('admin'));
 router.get('/profile', profileController.getProfile);
 router.put('/profile', profileController.updateProfile);
 router.put('/change-password', profileController.changePassword);
+router.put('/profile/avatar', upload.single('avatar'), profileController.uploadAvatar);
 
 router.get('/dashboard', adminController.getDashboard);
 router.get('/users', adminController.getUsers);

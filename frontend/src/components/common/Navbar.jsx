@@ -82,12 +82,9 @@ export default function Navbar({ onToggleSidebar }) {
 
     return (
         <nav
-            className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 lg:px-6"
+            className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 lg:px-6 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm transition-colors duration-500"
             style={{
                 height: 'var(--navbar-height)',
-                background: 'var(--bg-card)',
-                borderBottom: '1px solid var(--border-color)',
-                boxShadow: 'var(--shadow-sm)',
             }}
         >
             {/* Left */}
@@ -108,13 +105,13 @@ export default function Navbar({ onToggleSidebar }) {
                 {/* Dark mode toggle */}
                 <button
                     onClick={() => setDarkMode(!darkMode)}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="p-2 rounded-full bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-sm text-slate-700 dark:text-yellow-300 hover:scale-110 transition-all duration-300 focus:outline-none"
                     aria-label="Toggle dark mode"
                 >
                     {darkMode ? (
-                        <HiOutlineSun className="w-5 h-5 text-amber-400" />
+                        <HiOutlineSun className="w-5 h-5 text-yellow-400" />
                     ) : (
-                        <HiOutlineMoon className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
+                        <HiOutlineMoon className="w-5 h-5 text-indigo-600" />
                     )}
                 </button>
 

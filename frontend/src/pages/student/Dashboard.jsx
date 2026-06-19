@@ -2,14 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { studentAPI } from '../../services/apiService';
 import StatCard from '../../components/common/StatCard';
-import ChartCard from '../../components/common/ChartCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
-import { HiOutlineBookOpen, HiOutlineClipboardCheck, HiOutlineChartBar, HiOutlineCalendar, HiOutlineStar, HiOutlineBell, HiOutlineExclamation, HiOutlineRefresh, HiOutlineCheckCircle, HiOutlineClock, HiOutlineFire, HiOutlineArrowRight } from 'react-icons/hi';
-import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line,
-} from 'recharts';
+import { HiOutlineBookOpen, HiOutlineClipboardCheck, HiOutlineChartBar, HiOutlineCalendar, HiOutlineStar, HiOutlineBell, HiOutlineExclamation, HiOutlineRefresh, HiOutlineCheckCircle, HiOutlineClock, HiOutlineFire, HiOutlineArrowRight, HiOutlineClipboardList, HiOutlineLightBulb } from 'react-icons/hi';
 
 export default function StudentDashboard() {
     const { user } = useAuth();
@@ -60,17 +56,6 @@ export default function StudentDashboard() {
     }
 
     const stats = data?.stats || {};
-
-    // Use real performance data if available, otherwise show placeholder
-    const performanceData = data?.performanceTrend || [
-        { month: 'Jan', score: 72 }, { month: 'Feb', score: 78 }, { month: 'Mar', score: 85 },
-        { month: 'Apr', score: 80 }, { month: 'May', score: 82 }, { month: 'Jun', score: 90 },
-    ];
-
-    const subjectData = data?.subjectScores || [
-        { subject: 'OS', score: 82 }, { subject: 'DBMS', score: 75 }, { subject: 'CN', score: 88 },
-        { subject: 'DSA', score: 70 }, { subject: 'Java', score: 85 }, { subject: 'Python', score: 92 },
-    ];
 
     return (
         <div className="space-y-6">
@@ -134,36 +119,40 @@ export default function StudentDashboard() {
                     </Link>
                 </div>
 
-                {/* Pending Assignments */}
+                {/* Topics Completed */}
                 <div className="rounded-xl p-5 hover:shadow-lg transition-shadow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
                     <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                            <HiOutlineClock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                            <HiOutlineClipboardList className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div>
-                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>📝 Pending</p>
-                            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.pendingAssignments || 0}</p>
+                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>📖 Topics Completed</p>
+                            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.assessmentsCompleted || 0}</p>
                         </div>
                     </div>
-                    <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Assignments due</p>
+                    <div className="text-xs mb-3 truncate" style={{ color: 'var(--text-secondary)' }}>
+                        {stats.assessmentsBySubject && Object.keys(stats.assessmentsBySubject).length > 0 
+                            ? Object.entries(stats.assessmentsBySubject).map(([sub, count]) => `${sub}: ${count}`).join(' | ') 
+                            : 'No assessments completed'}
+                    </div>
                     <Link to="/student/assessments" className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
                         View Details <HiOutlineArrowRight className="w-3 h-3" />
                     </Link>
                 </div>
 
-                {/* Upcoming Tests */}
+                {/* Flashcards Mastered */}
                 <div className="rounded-xl p-5 hover:shadow-lg transition-shadow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
                     <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-                            <HiOutlineCalendar className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                            <HiOutlineLightBulb className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                         </div>
                         <div>
-                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>📊 Upcoming</p>
-                            <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{stats.upcomingTests || 0}</p>
+                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>🧠 Flashcards Mastered</p>
+                            <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{stats.flashcardsMastered || 0}</p>
                         </div>
                     </div>
-                    <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Tests scheduled</p>
-                    <Link to="/student/assessments" className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
+                    <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Cards learned successfully</p>
+                    <Link to="/student/flashcards" className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
                         View Details <HiOutlineArrowRight className="w-3 h-3" />
                     </Link>
                 </div>
@@ -186,46 +175,7 @@ export default function StudentDashboard() {
                 </div>
             </div>
 
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChartCard title="📈 Performance Trend">
-                    <ResponsiveContainer width="100%" height={260}>
-                        <LineChart data={performanceData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                            <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
-                            <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
-                            <Tooltip
-                                contentStyle={{
-                                    background: 'var(--bg-card)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '8px',
-                                    color: 'var(--text-primary)',
-                                }}
-                            />
-                            <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1', r: 5 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </ChartCard>
 
-                <ChartCard title="📊 Subject-wise Scores">
-                    <ResponsiveContainer width="100%" height={260}>
-                        <BarChart data={subjectData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                            <XAxis dataKey="subject" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
-                            <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
-                            <Tooltip
-                                contentStyle={{
-                                    background: 'var(--bg-card)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '8px',
-                                    color: 'var(--text-primary)',
-                                }}
-                            />
-                            <Bar dataKey="score" fill="#6366f1" radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </ChartCard>
-            </div>
 
             {/* Recent courses & notifications */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

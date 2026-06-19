@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { studentAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import SecurePDFViewer from '../../components/common/SecurePDFViewer';
 import toast from 'react-hot-toast';
-import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineDocumentText, HiOutlineClipboardList, HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi';
+import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineDocumentText, HiOutlineClipboardList, HiOutlineChevronDown, HiOutlineChevronUp, HiCheck } from 'react-icons/hi';
 
 export default function CourseDetail() {
     const { courseId } = useParams();
+    const [searchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab');
     const [course, setCourse] = useState(null);
     const [lectures, setLectures] = useState({});
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('topics');
+    const [activeTab, setActiveTab] = useState(tabParam || 'topics');
     const [selectedPDF, setSelectedPDF] = useState(null);
     const [expandedTopics, setExpandedTopics] = useState({});
     const [assessments, setAssessments] = useState([]);
@@ -20,6 +22,19 @@ export default function CourseDetail() {
     useEffect(() => {
         loadCourseData();
     }, [courseId]);
+
+    // Update activeTab when searchParams change (e.g. redirect back from quiz)
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
+
+    const handleTabChange = (tabName) => {
+        setActiveTab(tabName);
+        navigate(`/student/courses/${courseId}?tab=${tabName}`, { replace: true });
+    };
 
     const loadCourseData = async () => {
         try {
@@ -40,7 +55,13 @@ export default function CourseDetail() {
             const courseAssessments = allAssessments.filter(
                 a => (a.course._id || a.course) === courseId
             );
-            setAssessments(courseAssessments);
+            
+            // Remove duplicates by ID and Title (in case of duplicate DB records)
+            const uniqueAssessments = courseAssessments.filter((item, index, self) =>
+                index === self.findIndex((t) => t._id === item._id || t.title === item.title)
+            );
+            
+            setAssessments(uniqueAssessments);
 
             // Expand first topic by default
             const firstTopic = Object.keys(lecturesRes.data.data.lectures)[0];
@@ -66,6 +87,21 @@ export default function CourseDetail() {
             ...prev,
             [topic]: !prev[topic]
         }));
+    };
+
+    const handleLectureViewed = (newProgress, lectureId) => {
+        setCourse(prev => {
+            if (!prev) return prev;
+            const updatedViewed = prev.viewedLectures ? [...prev.viewedLectures] : [];
+            if (!updatedViewed.includes(lectureId)) {
+                updatedViewed.push(lectureId);
+            }
+            return {
+                ...prev,
+                progress: newProgress !== undefined ? newProgress : prev.progress,
+                viewedLectures: updatedViewed
+            };
+        });
     };
 
     if (loading) return <LoadingSpinner />;
@@ -119,19 +155,19 @@ export default function CourseDetail() {
                 <div className="flex gap-2 border-b" style={{ borderColor: 'var(--border-color)' }}>
                     <TabButton
                         active={activeTab === 'topics'}
-                        onClick={() => setActiveTab('topics')}
+                        onClick={() => handleTabChange('topics')}
                         label="Topics"
                         count={topics.length}
                     />
                     <TabButton
                         active={activeTab === 'quizzes'}
-                        onClick={() => setActiveTab('quizzes')}
+                        onClick={() => handleTabChange('quizzes')}
                         label="Quizzes"
                         count={assessments.length}
                     />
                     <TabButton
                         active={activeTab === 'pdfs'}
-                        onClick={() => setActiveTab('pdfs')}
+                        onClick={() => handleTabChange('pdfs')}
                         label="PDFs"
                         count={pdfLectures.length}
                     />
@@ -152,6 +188,8 @@ export default function CourseDetail() {
                                     onToggle={() => toggleTopic(topic)}
                                     getYouTubeEmbedUrl={getYouTubeEmbedUrl}
                                     onPDFClick={setSelectedPDF}
+                                    onLectureViewed={handleLectureViewed}
+                                    viewedLectures={course.viewedLectures || []}
                                 />
                             ))
                         )}
@@ -181,13 +219,36 @@ export default function CourseDetail() {
                                         <div className="space-y-1.5 text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
                                             <div className="flex items-center gap-2"><HiOutlinePlay className="w-4 h-4" />{a.duration} mins</div>
                                             <div className="flex items-center gap-2"><HiOutlineClipboardList className="w-4 h-4" />{a.totalMarks} marks</div>
-                                            <div>Attempts: {a.attempts || 0} / {a.maxAttempts >= 999 ? '∞' : a.maxAttempts}</div>
+                                            
+                                            <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--border-color)' }}>
+                                                <div className="flex justify-between py-0.5">
+                                                    <span>Attempts Used:</span>
+                                                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{a.attempts || 0} / 3</span>
+                                                </div>
+                                                <div className="flex justify-between py-0.5">
+                                                    <span>Best Score:</span>
+                                                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                                                        {a.attempts > 0 && a.bestScore !== undefined ? `${a.bestScore}/${a.totalMarks}` : '--'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between py-0.5">
+                                                    <span>Latest Score:</span>
+                                                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                                                        {a.attempts > 0 && a.obtainedMarks !== undefined ? `${a.obtainedMarks}/${a.totalMarks}` : '--'}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <button
-                                            onClick={() => navigate(`/student/assessments?start=${a._id}`)}
-                                            className="w-full py-2 rounded-lg text-sm font-medium text-white gradient-primary hover:opacity-90 transition-all"
+                                            disabled={a.attempts >= 3}
+                                            onClick={() => navigate(`/student/assessments?start=${a._id}&fromCourse=${courseId}`)}
+                                            className={`w-full py-2 rounded-lg text-sm font-medium text-white transition-all ${
+                                                a.attempts >= 3 
+                                                    ? 'bg-gray-400 cursor-not-allowed opacity-50' 
+                                                    : 'gradient-primary hover:opacity-90'
+                                            }`}
                                         >
-                                            {a.attempts > 0 ? 'Retake Quiz' : 'Start Quiz'}
+                                            {a.attempts >= 3 ? 'Attempts Exhausted' : a.attempts > 0 ? 'Retake Quiz' : 'Start Quiz'}
                                         </button>
                                     </div>
                                 ))}
@@ -206,6 +267,7 @@ export default function CourseDetail() {
                                     key={lecture._id}
                                     lecture={lecture}
                                     onView={() => setSelectedPDF(lecture)}
+                                    onLectureViewed={handleLectureViewed}
                                 />
                             ))
                         )}
@@ -241,7 +303,7 @@ function TabButton({ active, onClick, label, count }) {
     );
 }
 
-function TopicSection({ topic, lectures, expanded, onToggle, getYouTubeEmbedUrl, onPDFClick }) {
+function TopicSection({ topic, lectures, expanded, onToggle, getYouTubeEmbedUrl, onPDFClick, onLectureViewed, viewedLectures }) {
     return (
         <div
             className="rounded-xl overflow-hidden"
@@ -282,6 +344,8 @@ function TopicSection({ topic, lectures, expanded, onToggle, getYouTubeEmbedUrl,
                             index={idx + 1}
                             getYouTubeEmbedUrl={getYouTubeEmbedUrl}
                             onPDFClick={onPDFClick}
+                            onLectureViewed={onLectureViewed}
+                            isCompleted={viewedLectures.includes(lecture._id)}
                         />
                     ))}
                 </div>
@@ -290,7 +354,7 @@ function TopicSection({ topic, lectures, expanded, onToggle, getYouTubeEmbedUrl,
     );
 }
 
-function LectureListItem({ lecture, index, getYouTubeEmbedUrl, onPDFClick }) {
+function LectureListItem({ lecture, index, getYouTubeEmbedUrl, onPDFClick, onLectureViewed, isCompleted }) {
     const [showVideo, setShowVideo] = useState(false);
     const embedUrl = lecture.type === 'video' ? getYouTubeEmbedUrl(lecture.videoUrl) : null;
 
@@ -298,10 +362,16 @@ function LectureListItem({ lecture, index, getYouTubeEmbedUrl, onPDFClick }) {
         <div className="border-b last:border-0" style={{ borderColor: 'var(--border-color)' }}>
             <div className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                 <div className="flex items-start gap-3">
-                    {/* Index */}
-                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-                        {index}
-                    </div>
+                    {/* Index or Checkmark */}
+                    {isCompleted ? (
+                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 text-white shadow-sm">
+                            <HiCheck className="w-5 h-5" />
+                        </div>
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+                            {index}
+                        </div>
+                    )}
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
@@ -336,7 +406,11 @@ function LectureListItem({ lecture, index, getYouTubeEmbedUrl, onPDFClick }) {
                                 <button
                                     onClick={() => {
                                         if (!showVideo) {
-                                            studentAPI.viewLecture(lecture._id).catch(console.error);
+                                            studentAPI.viewLecture(lecture._id)
+                                                .then(res => {
+                                                    onLectureViewed(res.data?.progress, lecture._id);
+                                                })
+                                                .catch(console.error);
                                         }
                                         setShowVideo(!showVideo);
                                     }}
@@ -348,7 +422,11 @@ function LectureListItem({ lecture, index, getYouTubeEmbedUrl, onPDFClick }) {
                             ) : lecture.fileUrl ? (
                                 <button
                                     onClick={() => {
-                                        studentAPI.viewLecture(lecture._id).catch(console.error);
+                                        studentAPI.viewLecture(lecture._id)
+                                            .then(res => {
+                                                onLectureViewed(res.data?.progress, lecture._id);
+                                            })
+                                            .catch(console.error);
                                         onPDFClick(lecture);
                                     }}
                                     className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition-colors flex items-center gap-2"
@@ -380,13 +458,17 @@ function LectureListItem({ lecture, index, getYouTubeEmbedUrl, onPDFClick }) {
     );
 }
 
-function PDFListItem({ lecture, onView }) {
+function PDFListItem({ lecture, onView, onLectureViewed }) {
     return (
         <div
             className="rounded-xl p-4 hover:shadow-md transition-all cursor-pointer"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
             onClick={() => {
-                studentAPI.viewLecture(lecture._id).catch(console.error);
+                studentAPI.viewLecture(lecture._id)
+                    .then(res => {
+                        onLectureViewed(res.data?.progress, lecture._id);
+                    })
+                    .catch(console.error);
                 onView(lecture);
             }}
         >
