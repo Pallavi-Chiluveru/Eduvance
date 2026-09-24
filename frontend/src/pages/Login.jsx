@@ -44,7 +44,16 @@ export default function Login() {
         try {
             const user = await login(formData.email, formData.password);
             toast.success(`Welcome back, ${user.firstName}!`);
-            navigate(`/${user.role}`);
+            const destination = user.role === 'instructor'
+                ? user.instructorVerification?.status === 'approved' && user.instructorVerification?.emailVerified
+                    ? '/instructor/dashboard'
+                    : '/instructor/verification/email'
+                : user.role === 'reviewer' ? '/reviewer/dashboard'
+                    : user.role === 'mentor' ? '/mentor/dashboard'
+                        : user.role === 'admin' ? '/admin/dashboard'
+                            : user.role === 'instructor' ? '/instructor'
+                                : '/student';
+            navigate(destination);
         } catch (err) {
             const msg = err.response?.data?.message || 'Login failed. Please check your credentials.';
             setError(msg);

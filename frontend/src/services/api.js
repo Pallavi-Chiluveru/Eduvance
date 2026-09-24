@@ -9,33 +9,29 @@ const api = axios.create({
     },
 });
 
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // CSRF token management
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let csrfToken = null;
+let csrfRequest = null;
+let refreshRequest = null;
 
-/**
- * Fetch a CSRF token from the server and cache it.
- * This must happen once before any POST / PUT / PATCH / DELETE.
- */
+// Share a single request so concurrent mutations use the same cookie/token pair.
 async function ensureCsrfToken() {
     if (csrfToken) return csrfToken;
-    try {
-        const res = await api.get('/auth/csrf-token');
-        csrfToken = res.data.data.csrfToken;
-        return csrfToken;
-    } catch {
-        console.warn('Failed to fetch CSRF token');
-        return null;
+    if (!csrfRequest) {
+        csrfRequest = api.get('/auth/csrf-token').then((res) => {
+            csrfToken = res.data.data.csrfToken;
+            if (!csrfToken) throw new Error('Unable to obtain a CSRF token. Please try again.');
+            return csrfToken;
+        }).finally(() => { csrfRequest = null; });
     }
+    return csrfRequest;
 }
 
-// Pre-fetch the CSRF token on module load
-ensureCsrfToken();
-
-// ────────────────────────────────────────────
-// Request interceptor — attach JWT + CSRF token
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Request interceptor â€” attach JWT + CSRF token
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 api.interceptors.request.use(
     async (config) => {
         // Attach JWT
@@ -58,14 +54,28 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// ────────────────────────────────────────────
-// Response interceptor — handle 401 / refresh / CSRF retry
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Response interceptor â€” handle 401 / refresh / CSRF retry
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        if (!originalRequest) return Promise.reject(error);
+        if (error.response?.status === 429) {
+            const retryAfter = Number(error.response.headers?.['retry-after']);
+            if (Number.isFinite(retryAfter) && retryAfter > 0 && error.response.data) {
+                error.response.data.message = `Too many requests. Please try again in ${Math.ceil(retryAfter)} seconds.`;
+            }
+            return Promise.reject(error);
+        }
 
+        if (error.response?.status === 403
+            && error.response?.data?.message === 'Instructor approval required'
+            && window.location.pathname !== '/instructor/verification') {
+            window.location.replace('/instructor/verification');
+            return Promise.reject(error);
+        }
         // If CSRF token was rejected (403), refresh it and retry once
         if (error.response?.status === 403
             && error.response?.data?.message?.includes('CSRF')
@@ -80,11 +90,15 @@ api.interceptors.response.use(
         }
 
         // If 401 Unauthorized, try token refresh
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        const isAuthEntryRequest = /\/auth\/(login|register|refresh|csrf-token)(?:[?#]|$)/.test(originalRequest.url || '');
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEntryRequest) {
             originalRequest._retry = true;
 
             try {
-                const refreshRes = await api.post('/auth/refresh', {});
+                if (!refreshRequest) {
+                    refreshRequest = api.post('/auth/refresh', {}).finally(() => { refreshRequest = null; });
+                }
+                const refreshRes = await refreshRequest;
                 const newToken = refreshRes.data.data.accessToken;
                 localStorage.setItem('accessToken', newToken);
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;

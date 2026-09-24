@@ -12,6 +12,7 @@ export default function CourseDetail() {
     const tabParam = searchParams.get('tab');
     const [course, setCourse] = useState(null);
     const [lectures, setLectures] = useState({});
+    const [modules, setModules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(tabParam || 'topics');
     const [selectedPDF, setSelectedPDF] = useState(null);
@@ -49,6 +50,7 @@ export default function CourseDetail() {
             );
             setCourse(courseData);
             setLectures(lecturesRes.data.data.lectures);
+            setModules(lecturesRes.data.data.modules || []);
 
             // Filter assessments
             const allAssessments = assessmentsRes.data.data.assessments || [];
@@ -136,7 +138,7 @@ export default function CourseDetail() {
                                 {course.course?.name}
                             </h1>
                             <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
-                                {course.course?.code} • {course.course?.teacher?.firstName} {course.course?.teacher?.lastName}
+                                {course.course?.code} • {course.course?.instructor?.firstName} {course.course?.instructor?.lastName}
                             </p>
                             {course.course?.description && (
                                 <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -157,7 +159,7 @@ export default function CourseDetail() {
                         active={activeTab === 'topics'}
                         onClick={() => handleTabChange('topics')}
                         label="Topics"
-                        count={topics.length}
+                        count={modules.reduce((sum, module) => sum + module.lessons.length, 0) || topics.length}
                     />
                     <TabButton
                         active={activeTab === 'quizzes'}
@@ -176,7 +178,7 @@ export default function CourseDetail() {
                 {/* Content */}
                 {activeTab === 'topics' && (
                     <div className="space-y-3">
-                        {topics.length === 0 ? (
+                        {modules.length > 0 ? modules.map((module, index) => <ModuleOutline key={module._id || index} module={module} index={index} />) : topics.length === 0 ? (
                             <EmptyState message="No topics available yet" />
                         ) : (
                             topics.map((topic) => (
@@ -301,6 +303,10 @@ function TabButton({ active, onClick, label, count }) {
             {label} {count > 0 && `(${count})`}
         </button>
     );
+}
+
+function ModuleOutline({ module, index }) {
+    return <section className='rounded-xl p-5' style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}><p className='text-xs' style={{ color: 'var(--text-muted)' }}>MODULE {index + 1}</p><h2 className='font-bold text-lg mb-3'>{module.title}</h2><ol className='space-y-2'>{module.lessons.map((lesson, lessonIndex) => <li key={lesson._id || lessonIndex} className='p-3 rounded-lg' style={{ background: 'var(--bg-tertiary)' }}>{lessonIndex + 1}. {lesson.title}</li>)}</ol></section>;
 }
 
 function TopicSection({ topic, lectures, expanded, onToggle, getYouTubeEmbedUrl, onPDFClick, onLectureViewed, viewedLectures }) {

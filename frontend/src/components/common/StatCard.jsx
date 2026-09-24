@@ -1,4 +1,4 @@
-export default function StatCard({ title, value, icon: Icon, trend, color = 'indigo', subtitle }) {
+export default function StatCard({ title, value, icon: Icon, trend, color = 'indigo', subtitle, reviewer = false, delay = 0 }) {
     const colorMap = {
         indigo: 'from-indigo-500 to-indigo-600',
         emerald: 'from-emerald-500 to-emerald-600',
@@ -10,19 +10,20 @@ export default function StatCard({ title, value, icon: Icon, trend, color = 'ind
 
     return (
         <div
-            className="rounded-xl p-5 animate-slide-up"
+            className={`rounded-xl p-5 animate-slide-up ${reviewer ? `reviewer-stat reviewer-stat--${color}` : ''}`}
             style={{
                 background: 'var(--bg-card)',
                 border: '1px solid var(--border-color)',
                 boxShadow: 'var(--shadow-md)',
+                animationDelay: `${delay}ms`,
             }}
         >
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-sm font-medium mb-1 reviewer-stat-label" style={{ color: 'var(--text-muted)' }}>
                         {title}
                     </p>
-                    <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                    <h3 className="text-2xl font-bold reviewer-stat-value" style={{ color: 'var(--text-primary)' }}>
                         {value}
                     </h3>
                     {subtitle && (
@@ -39,7 +40,7 @@ export default function StatCard({ title, value, icon: Icon, trend, color = 'ind
                     )}
                 </div>
                 {Icon && (
-                    <div className={`p-3 rounded-lg bg-gradient-to-br ${colorMap[color]} shrink-0`}>
+                    <div className={`p-3 rounded-lg bg-gradient-to-br ${colorMap[color]} shrink-0 reviewer-stat-icon`}>
                         <Icon className="w-6 h-6 text-white" />
                     </div>
                 )}

@@ -23,7 +23,7 @@ export default function AdminDashboard() {
             setError(null);
         } catch (err) {
             console.error('Admin dashboard error:', err);
-            setError(err.response?.data?.message || 'Failed to load dashboard data');
+            setError('Unable to load dashboard data. Please try again.');
             toast.error('Failed to load dashboard data');
         } finally {
             setLoading(false);
@@ -57,11 +57,12 @@ export default function AdminDashboard() {
     }
 
     const s = data?.stats || {};
-    const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444'];
+    const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
     const roleData = [
         { name: 'Students', value: s.totalStudents || 0 },
-        { name: 'Teachers', value: s.totalTeachers || 0 },
-        { name: 'Parents', value: s.totalParents || 0 },
+        { name: 'Instructors', value: s.totalInstructors || 0 },
+        { name: 'Reviewers', value: s.totalReviewers || 0 },
+        { name: 'Mentors', value: s.totalMentors || 0 },
         { name: 'Admins', value: s.totalAdmins || 0 },
     ];
 
@@ -87,13 +88,11 @@ export default function AdminDashboard() {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                <StatCard title="Total Users" value={s.totalUsers || 0} icon={HiOutlineUsers} color="indigo" />
-                <StatCard title="Students" value={s.totalStudents || 0} icon={HiOutlineUserGroup} color="emerald" />
-                <StatCard title="Teachers" value={s.totalTeachers || 0} icon={HiOutlineUserGroup} color="cyan" />
-                <StatCard title="Courses" value={s.totalCourses || 0} icon={HiOutlineBookOpen} color="amber" />
-                <StatCard title="Assessments" value={s.totalAssessments || 0} icon={HiOutlineClipboardCheck} color="rose" />
-                <StatCard title="Active (7d)" value={s.activeUsersLast7Days || 0} icon={HiOutlineUsers} color="violet" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard title="Total Students" value={s.totalStudents || 0} icon={HiOutlineUsers} color="indigo" />
+                <StatCard title="Total Instructors" value={s.totalInstructors || 0} icon={HiOutlineUserGroup} color="cyan" />
+                <StatCard title="Pending Instructor Requests" value={s.pendingInstructorRequests || 0} icon={HiOutlineClipboardCheck} color="amber" />
+                <StatCard title="Published Courses" value={s.publishedCourses || 0} icon={HiOutlineBookOpen} color="emerald" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -124,9 +123,8 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                                 <span className={`text-xs px-2 py-1 rounded-full capitalize ${u.role === 'student' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                                        : u.role === 'teacher' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                            : u.role === 'parent' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                                : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                                        : u.role === 'instructor' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
                                     }`}>{u.role}</span>
                             </div>
                         ))}

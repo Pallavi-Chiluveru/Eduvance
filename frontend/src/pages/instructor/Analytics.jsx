@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { teacherAPI } from '../../services/apiService';
+import { instructorAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ChartCard from '../../components/common/ChartCard';
 import {
@@ -8,12 +8,12 @@ import {
 } from 'recharts';
 import { HiOutlineUsers, HiOutlineAcademicCap, HiOutlineClock, HiOutlineTrendingUp, HiOutlineLightBulb } from 'react-icons/hi';
 
-export default function TeacherAnalytics() {
+export default function InstructorAnalytics() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        teacherAPI.getAnalytics()
+        instructorAPI.getAnalytics()
             .then((r) => setData(r.data.data))
             .catch(console.error)
             .finally(() => setLoading(false));

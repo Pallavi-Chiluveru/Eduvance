@@ -127,9 +127,9 @@ export default function Profile() {
     if (!user) return <LoadingSpinner />;
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className={`max-w-4xl mx-auto space-y-6 ${user.role === 'reviewer' ? 'reviewer-page reviewer-profile' : ''}`}>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                👤 My Profile
+                My Profile
             </h1>
 
             {/* Profile Header Card */}
@@ -182,9 +182,8 @@ export default function Profile() {
                         </p>
                         <div className="flex gap-2">
                             <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${user.role === 'student' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                                : user.role === 'teacher' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                    : user.role === 'parent' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                        : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                                : user.role === 'instructor' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                    : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
                                 }`}>
                                 {user.role}
                             </span>
@@ -311,14 +310,14 @@ export default function Profile() {
             <div className="rounded-xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        🔒 Change Password
+                        Change Password
                     </h3>
                     {!changingPassword && (
                         <button
                             onClick={() => setChangingPassword(true)}
                             className="text-sm font-medium text-indigo-500 hover:text-indigo-400"
                         >
-                            Change Password
+                        Change Password
                         </button>
                     )}
                 </div>

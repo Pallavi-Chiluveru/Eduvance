@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { teacherAPI } from '../../services/apiService';
+import { instructorAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { HiOutlineCheck, HiOutlineClock, HiOutlineX } from 'react-icons/hi';
@@ -13,14 +13,14 @@ export default function AttendanceManager() {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        teacherAPI.getCourses().then((r) => setCourses(r.data.data.courses || [])).catch(console.error).finally(() => setLoading(false));
+        instructorAPI.getCourses().then((r) => setCourses(r.data.data.courses || [])).catch(console.error).finally(() => setLoading(false));
     }, []);
 
     const loadStudents = async (courseId) => {
         setSelectedCourse(courseId);
         if (!courseId) return;
         try {
-            const res = await teacherAPI.getCourseStudents(courseId);
+            const res = await instructorAPI.getCourseStudents(courseId);
             const s = res.data.data.students || [];
             setStudents(s);
             const init = {};
@@ -40,7 +40,7 @@ export default function AttendanceManager() {
                 studentId, courseId: selectedCourse, status, date: new Date().toISOString().split('T')[0],
             }));
             for (const r of records) {
-                await teacherAPI.markAttendance(r);
+                await instructorAPI.markAttendance(r);
             }
             toast.success('Attendance marked!');
         } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }

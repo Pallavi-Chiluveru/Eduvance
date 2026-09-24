@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineZoomIn, HiOutlineZoomOut, HiOutlineX, HiOutlineDownload, HiOutlineExclamation } from 'react-icons/hi';
-import { studentAPI, teacherAPI } from '../../services/apiService';
+import { studentAPI, instructorAPI } from '../../services/apiService';
 import toast from 'react-hot-toast';
 
 export default function SecurePDFViewer({ lectureId, role, title, onClose }) {
@@ -17,7 +17,7 @@ export default function SecurePDFViewer({ lectureId, role, title, onClose }) {
             try {
                 setLoading(true);
                 setError(null);
-                const api = role === 'teacher' ? teacherAPI : studentAPI;
+                const api = role === 'instructor' ? instructorAPI : studentAPI;
                 const response = await api.getLecturePDF(lectureId);
 
                 if (isMounted) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { teacherAPI } from '../../services/apiService';
+import { instructorAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -11,7 +11,7 @@ export default function Grading() {
 
     const load = async () => {
         try {
-            const res = await teacherAPI.getSubmissions('pending');
+            const res = await instructorAPI.getSubmissions('pending');
             setSubmissions(res.data.data.submissions || []);
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
@@ -25,7 +25,7 @@ export default function Grading() {
                 questionId: qId,
                 marksAwarded: Number(m)
             }));
-            await teacherAPI.gradeSubmission(submissionId, { answers: gradedAnswers });
+            await instructorAPI.gradeSubmission(submissionId, { answers: gradedAnswers });
             toast.success('Graded successfully!');
             setGrading(null);
             setMarks({});

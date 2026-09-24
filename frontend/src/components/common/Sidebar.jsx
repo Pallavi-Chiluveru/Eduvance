@@ -6,7 +6,6 @@ import {
     HiOutlineBookOpen,
     HiOutlineClipboardCheck,
     HiOutlineChartBar,
-    HiOutlineCalendar,
     HiOutlineLightBulb,
     HiOutlineStar,
     HiOutlineChatAlt2,
@@ -17,7 +16,6 @@ import {
     HiOutlineCog,
     HiOutlineDocumentReport,
     HiOutlineX,
-    HiOutlineBell,
     HiOutlineFire,
     HiOutlineCode,
 } from 'react-icons/hi';
@@ -32,27 +30,40 @@ const menuItems = {
         { label: 'Flashcards', path: '/student/flashcards', icon: HiOutlineLightBulb },
         { label: 'Rewards', path: '/student/rewards', icon: HiOutlineStar },
         { label: 'AI Assistant', path: '/student/chatbot', icon: HiOutlineChatAlt2 },
-        { label: 'DSA Arena ⭐', path: '/student/dsa-arena', icon: HiOutlineCode },
+        { label: 'DSA Arena', path: '/student/dsa-arena', icon: HiOutlineCode },
+        { label: 'Mentor Feedback', path: '/student/mentor-feedback', icon: HiOutlineChatAlt2 },
     ],
-    teacher: [
-        { label: 'Dashboard', path: '/teacher', icon: HiOutlineHome },
-        { label: 'My Courses', path: '/teacher/courses', icon: HiOutlineBookOpen },
-        { label: 'Content Manager', path: '/teacher/content', icon: HiOutlineUpload },
-        { label: 'Assessments', path: '/teacher/assessments', icon: HiOutlinePencilAlt },
-        { label: 'Grading', path: '/teacher/grading', icon: HiOutlineClipboardCheck },
-        { label: 'Analytics', path: '/teacher/analytics', icon: HiOutlineChartBar },
-    ],
-    parent: [
-        { label: 'Dashboard', path: '/parent', icon: HiOutlineHome },
-        { label: 'Performance', path: '/parent/performance', icon: HiOutlineChartBar },
-        { label: 'Attendance', path: '/parent/attendance', icon: HiOutlineCalendar },
-        { label: 'Notifications', path: '/parent/notifications', icon: HiOutlineBell },
+    instructor: [
+        { label: 'Dashboard', path: '/instructor/dashboard', icon: HiOutlineHome },
+        { label: 'My Courses', path: '/instructor/courses', icon: HiOutlineBookOpen },
+        { label: 'Content Manager', path: '/instructor/content', icon: HiOutlineUpload },
+        { label: 'Assessments', path: '/instructor/assessments', icon: HiOutlinePencilAlt },
+        { label: 'Grading', path: '/instructor/grading', icon: HiOutlineClipboardCheck },
+        { label: 'Analytics', path: '/instructor/analytics', icon: HiOutlineChartBar },
     ],
     admin: [
         { label: 'Dashboard', path: '/admin', icon: HiOutlineHome },
         { label: 'User Management', path: '/admin/users', icon: HiOutlineUsers },
         { label: 'Course Management', path: '/admin/courses', icon: HiOutlineAcademicCap },
         { label: 'System Analytics', path: '/admin/analytics', icon: HiOutlineDocumentReport },
+        { label: 'Instructor Requests', path: '/admin/instructors', icon: HiOutlineAcademicCap },
+        { label: 'Reviewers', path: '/admin/reviewers', icon: HiOutlineClipboardCheck },
+        { label: 'Mentors', path: '/admin/mentors', icon: HiOutlineUsers },
+        { label: 'Course Reviews', path: '/admin/course-reviews', icon: HiOutlineBookOpen },
+        { label: 'Categories', path: '/admin/categories', icon: HiOutlineCog },
+        { label: 'Policies', path: '/admin/policies', icon: HiOutlineDocumentReport },
+    ],
+    reviewer: [
+        { label: 'Dashboard', path: '/reviewer/dashboard', icon: HiOutlineHome },
+        { label: 'Pending Reviews', path: '/reviewer/pending', icon: HiOutlineClipboardCheck },
+        { label: 'Review History', path: '/reviewer/history', icon: HiOutlineDocumentReport },
+    ],
+    mentor: [
+        { label: 'Dashboard', path: '/mentor/dashboard', icon: HiOutlineHome },
+        { label: 'My Learners', path: '/mentor/learners', icon: HiOutlineUsers },
+        { label: 'Learner Progress', path: '/mentor/learners', icon: HiOutlineChartBar },
+        { label: 'Feedback', path: '/mentor/feedback', icon: HiOutlineChatAlt2 },
+        { label: 'Mentoring Sessions', path: '/mentor/sessions', icon: HiOutlineClipboardCheck },
     ],
 };
 
@@ -64,11 +75,11 @@ export default function Sidebar({ isOpen, onClose }) {
         <>
             {/* Mobile overlay */}
             {isOpen && (
-                <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
+                <div className={`fixed inset-0 bg-black/50 z-40 lg:hidden ${user?.role === 'reviewer' ? 'reviewer-sidebar-overlay' : ''}`} onClick={onClose} />
             )}
 
             <aside
-                className={`fixed top-0 left-0 z-50 h-full flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 z-50 h-full flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${user?.role === 'reviewer' ? 'reviewer-sidebar' : ''} ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 style={{
                     width: 'var(--sidebar-width)',
@@ -104,7 +115,7 @@ export default function Sidebar({ isOpen, onClose }) {
                             end={item.path === `/${user?.role}`}
                             onClick={onClose}
                             className={({ isActive }) =>
-                                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                                `sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
                                     ? 'bg-white/15 text-white shadow-md'
                                     : 'text-white/60 hover:text-white hover:bg-white/8'
                                 }`

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { teacherAPI } from '../../services/apiService';
+import { instructorAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi';
@@ -9,12 +9,12 @@ export default function AssessmentBuilder() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
-        title: '', courseId: '', type: 'practice', description: '', totalMarks: 20, passingMarks: 8, duration: 30, difficulty: 'medium', maxAttempts: 999,
+        title: '', courseId: '', type: 'practice', assessmentType: 'quiz', description: '', totalMarks: 20, passingMarks: 8, duration: 30, difficulty: 'medium', maxAttempts: 999,
     });
     const [questions, setQuestions] = useState([]);
 
     useEffect(() => {
-        teacherAPI.getCourses().then((r) => setCourses(r.data.data.courses || [])).catch(console.error).finally(() => setLoading(false));
+        instructorAPI.getCourses().then((r) => setCourses(r.data.data.courses || [])).catch(console.error).finally(() => setLoading(false));
     }, []);
 
     const addQuestion = () => {
@@ -44,9 +44,9 @@ export default function AssessmentBuilder() {
         if (questions.length === 0) return toast.error('Add at least one question');
         setSubmitting(true);
         try {
-            await teacherAPI.createAssessment({ ...form, questions });
+            await instructorAPI.createAssessment({ ...form, course: form.courseId, questions });
             toast.success('Assessment created!');
-            setForm({ title: '', courseId: '', type: 'practice', description: '', totalMarks: 20, passingMarks: 8, duration: 30, difficulty: 'medium', maxAttempts: 999 });
+            setForm({ title: '', courseId: '', type: 'practice', assessmentType: 'quiz', description: '', totalMarks: 20, passingMarks: 8, duration: 30, difficulty: 'medium', maxAttempts: 999 });
             setQuestions([]);
         } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
         finally { setSubmitting(false); }
@@ -63,15 +63,18 @@ export default function AssessmentBuilder() {
                 <div className="rounded-xl p-5 space-y-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
                     <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Assessment Details</h3>
                     <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Assessment Title" required className="w-full px-4 py-2.5 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} />
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <select value={form.courseId} onChange={(e) => setForm({ ...form, courseId: e.target.value })} required className="px-4 py-2.5 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
                             <option value="">Select Course</option>
                             {courses.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
                         </select>
                         <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="px-4 py-2.5 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
                             <option value="practice">Practice</option>
-                            <option value="chapter_test">Chapter Test</option>
+                            <option value="topic_test">Topic Test</option>
                             <option value="final">Final</option>
+                        </select>
+                        <select value={form.assessmentType} onChange={(e) => setForm({ ...form, assessmentType: e.target.value })} className="px-4 py-2.5 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
+                            <option value="quiz">Quiz</option><option value="assignment">Assignment</option><option value="evaluation">Evaluation</option>
                         </select>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -90,15 +93,16 @@ export default function AssessmentBuilder() {
                                 <button type="button" onClick={() => removeQuestion(idx)} className="text-rose-500 hover:text-rose-400"><HiOutlineTrash className="w-4 h-4" /></button>
                             </div>
                             <textarea value={q.questionText} onChange={(e) => updateQuestion(idx, 'questionText', e.target.value)} placeholder="Question text" rows={2} required className="w-full px-4 py-2 rounded-lg text-sm outline-none resize-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} />
+                            <select value={q.type} onChange={(e) => updateQuestion(idx, 'type', e.target.value)} className="w-48 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}><option value="mcq">Multiple choice</option><option value="descriptive">Written response</option></select>
                             <input type="number" value={q.marks} onChange={(e) => updateQuestion(idx, 'marks', +e.target.value)} placeholder="Marks" className="w-32 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} />
-                            <div className="space-y-2">
+                            {q.type === 'mcq' && <div className="space-y-2">
                                 {q.options.map((opt, oi) => (
                                     <div key={oi} className="flex items-center gap-2">
                                         <input type="radio" checked={opt.isCorrect} onChange={() => updateOption(idx, oi, 'isCorrect', true)} className="accent-emerald-500" />
                                         <input value={opt.text} onChange={(e) => updateOption(idx, oi, 'text', e.target.value)} placeholder={`Option ${String.fromCharCode(65 + oi)}`} required className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} />
                                     </div>
                                 ))}
-                            </div>
+                            </div>}
                         </div>
                     ))}
                 </div>

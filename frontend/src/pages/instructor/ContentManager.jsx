@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { teacherAPI } from '../../services/apiService';
+import { instructorAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import SecurePDFViewer from '../../components/common/SecurePDFViewer';
 import toast from 'react-hot-toast';
@@ -46,7 +46,7 @@ export default function ContentManager() {
 
     const loadCourses = async () => {
         try {
-            const res = await teacherAPI.getCourses();
+            const res = await instructorAPI.getCourses();
             setCourses(res.data.data.courses || []);
         } catch (err) {
             console.error(err);
@@ -58,7 +58,7 @@ export default function ContentManager() {
 
     const loadLectures = async () => {
         try {
-            const res = await teacherAPI.getLectures(selectedCourse);
+            const res = await instructorAPI.getLectures(selectedCourse);
             setLectures(res.data.data.lectures || {});
         } catch (err) {
             console.error(err);
@@ -100,7 +100,7 @@ export default function ContentManager() {
                 return;
             }
 
-            await teacherAPI.uploadLecture(data);
+            await instructorAPI.uploadLecture(data);
             toast.success('Content uploaded successfully!');
             setShowForm(false);
             resetForm();
@@ -117,7 +117,7 @@ export default function ContentManager() {
         if (!window.confirm('Are you sure you want to delete this content?')) return;
 
         try {
-            await teacherAPI.deleteLecture(lectureId);
+            await instructorAPI.deleteLecture(lectureId);
             toast.success('Content deleted');
             loadLectures();
         } catch (err) {
@@ -441,7 +441,7 @@ export default function ContentManager() {
             {selectedPDF && (
                 <SecurePDFViewer
                     lectureId={selectedPDF._id}
-                    role="teacher"
+                    role="instructor"
                     title={selectedPDF.title}
                     onClose={() => setSelectedPDF(null)}
                 />

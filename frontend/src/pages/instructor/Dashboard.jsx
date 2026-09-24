@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { teacherAPI } from '../../services/apiService';
+import { instructorAPI } from '../../services/apiService';
 import StatCard from '../../components/common/StatCard';
 import ChartCard from '../../components/common/ChartCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { HiOutlineBookOpen, HiOutlineUsers, HiOutlineClipboardCheck, HiOutlinePencilAlt, HiOutlineExclamation, HiOutlineRefresh } from 'react-icons/hi';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
-export default function TeacherDashboard() {
+export default function InstructorDashboard() {
     const { user } = useAuth();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -19,11 +19,11 @@ export default function TeacherDashboard() {
     const loadDashboardData = async (showRefreshLoading = false) => {
         try {
             if (showRefreshLoading) setRefreshing(true);
-            const res = await teacherAPI.getDashboard();
+            const res = await instructorAPI.getDashboard();
             setData(res.data.data);
             setError(null);
         } catch (err) {
-            console.error('Teacher dashboard error:', err);
+            console.error('Instructor dashboard error:', err);
             setError(err.response?.data?.message || 'Failed to load dashboard data');
             toast.error('Failed to load dashboard data');
         } finally {
@@ -57,9 +57,10 @@ export default function TeacherDashboard() {
         );
     }
     const s = data?.stats || {};
+    const teachingBase = user?.role === 'instructor' ? '/instructor' : '/instructor';
     const COLORS = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
 
-    const courseData = (data?.courses || []).map((c, i) => ({
+    const courseData = (data?.courses || []).map((c) => ({
         name: c.name?.substring(0, 12),
         value: c.studentCount || 1,
     }));
@@ -71,7 +72,7 @@ export default function TeacherDashboard() {
                     <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Welcome, {user?.firstName}! 👨‍🏫</h1>
                     <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Manage your courses, assessments, and students</p>
                 </div>
-                <button
+                <div className='flex gap-2'><Link to={`${teachingBase}/courses/new`} className='px-4 py-2 rounded-lg text-sm font-medium text-white gradient-primary'>+ Create Course</Link><button
                     onClick={() => loadDashboardData(true)}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
                     style={{
@@ -83,7 +84,7 @@ export default function TeacherDashboard() {
                 >
                     <HiOutlineRefresh className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                     {refreshing ? 'Refreshing...' : 'Refresh'}
-                </button>
+                </button></div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -113,10 +114,10 @@ export default function TeacherDashboard() {
                 <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
                     <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>📋 Quick Actions</h3>
                     <div className="grid grid-cols-2 gap-3">
-                        {[{ label: 'Upload Content', href: '/teacher/content', icon: '📤', color: 'from-indigo-500 to-indigo-600' },
-                        { label: 'Create Test', href: '/teacher/assessments', icon: '📝', color: 'from-emerald-500 to-emerald-600' },
-                        { label: 'Grade Work', href: '/teacher/grading', icon: '✅', color: 'from-amber-500 to-amber-600' },
-                        { label: 'View Analytics', href: '/teacher/analytics', icon: '📊', color: 'from-cyan-500 to-cyan-600' },
+                        {[{ label: 'Create Course', href: `${teachingBase}/courses/new`, icon: '➕', color: 'from-indigo-500 to-indigo-600' },
+                        { label: 'Upload Content', href: `${teachingBase}/content`, icon: '📤', color: 'from-emerald-500 to-emerald-600' },
+                        { label: 'Create Test', href: `${teachingBase}/assessments`, icon: '📝', color: 'from-amber-500 to-amber-600' },
+                        { label: 'View Analytics', href: `${teachingBase}/analytics`, icon: '📊', color: 'from-cyan-500 to-cyan-600' },
                         ].map((a) => (
                             <Link
                                 key={a.label}

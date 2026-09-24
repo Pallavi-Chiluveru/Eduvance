@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
     HiOutlineBell,
@@ -10,7 +10,7 @@ import {
     HiOutlineUser,
 } from 'react-icons/hi';
 import Logo from './Logo';
-import { studentAPI, parentAPI } from '../../services/apiService';
+import { authAPI } from '../../services/apiService';
 import toast from 'react-hot-toast';
 
 export default function Navbar({ onToggleSidebar }) {
@@ -24,34 +24,32 @@ export default function Navbar({ onToggleSidebar }) {
     const [notifications, setNotifications] = useState([]);
     const [loadingNotifications, setLoadingNotifications] = useState(false);
 
-    const fetchNotifications = async () => {
-        if (!user || (user.role !== 'student' && user.role !== 'parent')) return;
+    const fetchNotifications = useCallback(async () => {
+        if (!user) return;
 
         try {
             setLoadingNotifications(true);
-            const api = user.role === 'student' ? studentAPI : parentAPI;
-            const res = await api.getNotifications();
+            const res = await authAPI.getNotifications();
             setNotifications(res.data.data.notifications || []);
         } catch (err) {
             console.error('Failed to fetch notifications:', err);
         } finally {
             setLoadingNotifications(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         fetchNotifications();
         // Poll for notifications every 2 minutes
         const interval = setInterval(fetchNotifications, 120000);
         return () => clearInterval(interval);
-    }, [user?.role]);
+    }, [fetchNotifications]);
 
     const handleMarkAsRead = async (id) => {
         try {
-            const api = user.role === 'student' ? studentAPI : parentAPI;
-            await api.markNotificationRead(id);
+            await authAPI.markNotificationRead(id);
             setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
-        } catch (err) {
+        } catch {
             toast.error('Failed to mark notification as read');
         }
     };
@@ -75,9 +73,10 @@ export default function Navbar({ onToggleSidebar }) {
 
     const roleColors = {
         student: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
-        teacher: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
-        parent: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+        instructor: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
         admin: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
+        reviewer: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+        mentor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
     };
 
     return (

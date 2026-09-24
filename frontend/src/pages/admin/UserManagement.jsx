@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { adminAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineSearch } from 'react-icons/hi';
 
 export default function UserManagement() {
+    const { user: currentUser } = useAuth();
+    const [error, setError] = useState('');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({});
@@ -15,10 +18,11 @@ export default function UserManagement() {
 
     const load = async () => {
         try {
+            setError('');
             const res = await adminAPI.getUsers(filters);
             setUsers(res.data.data.users || []);
             setPagination(res.data.data.pagination || {});
-        } catch (err) { console.error(err); }
+        } catch { setError('Unable to load users. Please try again.'); }
         finally { setLoading(false); }
     };
 
@@ -28,7 +32,7 @@ export default function UserManagement() {
 
     const openCreate = () => {
         setEditUser(null);
-        setForm({ firstName: '', lastName: '', email: '', password: 'demo123', role: 'student' });
+        setForm({ firstName: '', lastName: '', email: '', password: '', role: 'student' });
         setShowModal(true);
     };
 
@@ -59,15 +63,16 @@ export default function UserManagement() {
             await adminAPI.deleteUser(id);
             toast.success('User deactivated');
             load();
-        } catch (err) { toast.error('Failed'); }
+        } catch { toast.error('Failed'); }
     };
 
     if (loading) return <LoadingSpinner />;
 
     const roleColors = {
         student: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-        teacher: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-        parent: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        instructor: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+        reviewer: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+        mentor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
         admin: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
     };
 
@@ -80,6 +85,7 @@ export default function UserManagement() {
                 </button>
             </div>
 
+            {error && <p role="alert">{error} <button onClick={load} className="underline">Try again</button></p>}
             {/* Filters */}
             <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 flex-1 min-w-[200px]">
@@ -101,8 +107,8 @@ export default function UserManagement() {
                 >
                     <option value="">All roles</option>
                     <option value="student">Students</option>
-                    <option value="teacher">Teachers</option>
-                    <option value="parent">Parents</option>
+                    <option value="instructor">Instructors</option>
+                    <option value="reviewer">Reviewers</option><option value="mentor">Mentors</option>
                     <option value="admin">Admins</option>
                 </select>
             </div>
@@ -112,7 +118,7 @@ export default function UserManagement() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead><tr style={{ background: 'var(--bg-tertiary)' }}>
-                            {['Name', 'Email', 'Role', 'Status', 'Actions'].map((h) => (
+                            {['Name', 'Email', 'Role', 'Status', 'Joined', 'Actions'].map((h) => (
                                 <th key={h} className="px-4 py-3 text-left font-medium" style={{ color: 'var(--text-muted)' }}>{h}</th>
                             ))}
                         </tr></thead>
@@ -134,14 +140,16 @@ export default function UserManagement() {
                                             {u.isActive !== false ? 'Active' : 'Inactive'}
                                         </span>
                                     </td>
+                                    <td className="px-4 py-3">{new Date(u.createdAt).toLocaleDateString()}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-1">
                                             <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"><HiOutlinePencil className="w-4 h-4 text-indigo-500" /></button>
-                                            <button onClick={() => handleDelete(u._id)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"><HiOutlineTrash className="w-4 h-4 text-rose-500" /></button>
+                                            <button disabled={u._id === currentUser?._id || u._id === currentUser?.id} onClick={() => handleDelete(u._id)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"><HiOutlineTrash className="w-4 h-4 text-rose-500" /></button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
+                            {!users.length && !error && <tr><td colSpan={6} className="p-8 text-center">No users found.</td></tr>}
                         </tbody>
                     </table>
                 </div>
@@ -170,10 +178,10 @@ export default function UserManagement() {
                         </div>
                         <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} type="email" placeholder="Email" required className="w-full px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} />
                         {!editUser && <input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} type="password" placeholder="Password" required className="w-full px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} />}
-                        <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
+                        <select disabled={Boolean(editUser && (editUser._id === currentUser?._id || editUser._id === currentUser?.id))} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
                             <option value="student">Student</option>
-                            <option value="teacher">Teacher</option>
-                            <option value="parent">Parent</option>
+                            <option value="instructor">Instructor</option>
+                            <option value="reviewer">Reviewer</option><option value="mentor">Mentor</option>
                             <option value="admin">Admin</option>
                         </select>
                         <div className="flex gap-3 pt-2">

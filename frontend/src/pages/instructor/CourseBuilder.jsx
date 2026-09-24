@@ -1,0 +1,39 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
+import { instructorAPI } from '../../services/apiService';
+import CourseCard from '../../components/common/CourseCard';
+import CourseInfoModal from '../../components/common/CourseInfoModal';
+import { useAuth } from '../../hooks/useAuth';
+
+const steps = ['Basic Info', 'Details', 'Content', 'Preview', 'Submit'];
+const topicCountFor = (course) => course?.topicCount ?? course?.modules?.reduce((sum, module) => sum + (module.lessons?.length || 0), 0) ?? 0;
+export default function CourseBuilder() {
+    const { courseId } = useParams(); const navigate = useNavigate();
+    const { user } = useAuth(); const base = user?.role === 'instructor' ? '/instructor' : '/instructor';
+    const [course, setCourse] = useState(null); const [view, setView] = useState('content'); const [showInfo, setShowInfo] = useState(false); const [moduleTitle, setModuleTitle] = useState('');
+    useEffect(() => { instructorAPI.getCourse(courseId).then((response) => setCourse(response.data.data.course)).catch(() => navigate(`${base}/courses`)); }, [courseId, navigate, base]);
+    if (!course) return <p>Loading course…</p>;
+    const editable = ['draft', 'changes_requested'].includes(course.status);
+    const persist = async (modules) => { try { const response = await instructorAPI.updateCourse(courseId, { modules }); setCourse(response.data.data.course); toast.success('Course content saved'); } catch (error) { toast.error(error.response?.data?.message || 'Unable to save'); } };
+    const addModule = () => { if (!moduleTitle.trim()) return; persist([...(course.modules || []), { title: moduleTitle.trim(), order: course.modules?.length || 0, lessons: [] }]); setModuleTitle(''); };
+    const editModule = (index) => { const title = window.prompt('Module title', course.modules[index].title)?.trim(); if (!title) return; persist(course.modules.map((item, i) => i === index ? { ...item, title } : item)); };
+    const deleteModule = (index) => { if (window.confirm('Delete this module and all its lessons?')) persist(course.modules.filter((_, i) => i !== index)); };
+    const addLesson = (index) => { const title = window.prompt('Lesson title')?.trim(); if (!title) return; persist(course.modules.map((item, i) => i === index ? { ...item, lessons: [...item.lessons, { title, order: item.lessons.length }] } : item)); };
+    const editLesson = (mi, li) => { const title = window.prompt('Lesson title', course.modules[mi].lessons[li].title)?.trim(); if (!title) return; persist(course.modules.map((item, i) => i === mi ? { ...item, lessons: item.lessons.map((lesson, j) => j === li ? { ...lesson, title } : lesson) } : item)); };
+    const deleteLesson = (mi, li) => persist(course.modules.map((item, i) => i === mi ? { ...item, lessons: item.lessons.filter((_, j) => j !== li) } : item));
+    const move = (index, direction) => { const target = index + direction; if (target < 0 || target >= course.modules.length) return; const modules = [...course.modules]; [modules[index], modules[target]] = [modules[target], modules[index]]; persist(modules.map((item, order) => ({ ...item, order }))); };
+    const submit = async () => { try { await instructorAPI.submitCourseReview(courseId); toast.success('Course submitted for review'); navigate(`${base}/courses`); } catch (error) { toast.error(error.response?.data?.message || 'Unable to submit'); } };
+    const active = view === 'content' ? 2 : view === 'preview' ? 3 : 4;
+    return <div className='max-w-5xl mx-auto space-y-6'><StepIndicator active={active} /><header className='flex flex-wrap justify-between gap-3'><div><p className='text-sm' style={{ color: 'var(--text-muted)' }}>{course.code} · {course.category}</p><h1 className='text-2xl font-bold'>{view === 'preview' ? 'Student Preview' : view === 'submit' ? 'Submit for Review' : 'Course Content'}</h1></div><div className='flex gap-2'><button onClick={() => setView('content')}>Content</button><button onClick={() => setView('preview')}>Preview</button><button onClick={() => setView('submit')} className='px-4 py-2 rounded-lg text-white gradient-primary'>Review & Submit</button></div></header>
+        {course.reviewMessage ? <p className='p-3 rounded-lg bg-amber-100 text-amber-900'>Reviewer feedback: {course.reviewMessage}</p> : null}
+        {view === 'content' ? <Content course={course} editable={editable} moduleTitle={moduleTitle} setModuleTitle={setModuleTitle} addModule={addModule} addLesson={addLesson} editModule={editModule} editLesson={editLesson} deleteModule={deleteModule} deleteLesson={deleteLesson} move={move} /> : null}
+        {view === 'preview' ? <div className='max-w-sm mx-auto'><CourseCard course={course} variant='preview' onInfoClick={() => setShowInfo(true)} /></div> : null}
+        {view === 'submit' ? <div className='rounded-xl p-6 text-center space-y-4' style={{ background: 'var(--bg-card)' }}><h2 className='text-xl font-bold'>Ready for review?</h2><p>{topicCountFor(course)} topics across {course.modules?.length || 0} modules</p><p className='text-sm'>After submission, editing is locked until the reviewer approves it or requests changes.</p><button disabled={!editable} onClick={submit} className='px-6 py-3 rounded-lg text-white gradient-primary'>Submit for Review</button></div> : null}
+        <CourseInfoModal course={showInfo ? course : null} onClose={() => setShowInfo(false)} />
+    </div>;
+}
+
+function StepIndicator({ active }) { return <ol className='grid grid-cols-5 gap-2'>{steps.map((label, index) => <li key={label} className={`text-center text-xs md:text-sm p-2 rounded-lg ${index <= active ? 'gradient-primary text-white' : ''}`} style={index > active ? { background: 'var(--bg-card)', color: 'var(--text-muted)' } : {}}><b className='block'>{index + 1}</b>{label}</li>)}</ol>; }
+function Content({ course, editable, moduleTitle, setModuleTitle, addModule, addLesson, editModule, editLesson, deleteModule, deleteLesson, move }) { return <div className='space-y-4'>{course.modules?.map((module, mi) => <section key={module._id || mi} className='rounded-xl p-5' style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}><div className='flex justify-between gap-3'><div><p className='text-xs'>MODULE {mi + 1}</p><h2 className='font-bold text-lg'>{module.title}</h2></div>{editable ? <div className='flex gap-2'><button aria-label='Move module up' onClick={() => move(mi, -1)}><HiOutlineChevronUp /></button><button aria-label='Move module down' onClick={() => move(mi, 1)}><HiOutlineChevronDown /></button><button aria-label='Edit module' onClick={() => editModule(mi)}><HiOutlinePencil /></button><button aria-label='Delete module' onClick={() => deleteModule(mi)}><HiOutlineTrash /></button></div> : null}</div><ol className='my-4 space-y-2'>{module.lessons.map((lesson, li) => <li key={lesson._id || li} className='flex justify-between p-3 rounded-lg' style={{ background: 'var(--bg-tertiary)' }}><span>{li + 1}. {lesson.title}</span>{editable ? <span className='flex gap-3'><button onClick={() => editLesson(mi, li)}>Edit</button><button onClick={() => deleteLesson(mi, li)}>Delete</button></span> : null}</li>)}</ol>{editable ? <button onClick={() => addLesson(mi)} className='text-indigo-600'>+ Add Topic / Lesson</button> : null}</section>)}{editable ? <div className='rounded-xl p-5 flex gap-3' style={{ background: 'var(--bg-card)' }}><input value={moduleTitle} onChange={(event) => setModuleTitle(event.target.value)} placeholder='New module title' className='flex-1 px-3 py-2 rounded-lg border' /><button onClick={addModule} className='px-4 py-2 rounded-lg text-white gradient-primary'>+ Add Module</button></div> : null}</div>; }

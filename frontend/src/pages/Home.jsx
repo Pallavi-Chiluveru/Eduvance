@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBookOpen, FaUsers, FaFileAlt, FaRobot, FaUserGraduate, FaChalkboardTeacher, FaUserFriends, FaUserShield, FaGithub, FaSun, FaMoon } from 'react-icons/fa';
+import { FaBookOpen, FaUsers, FaFileAlt, FaRobot, FaUserGraduate, FaUserTie, FaCheckCircle, FaUserShield, FaGithub, FaSun, FaMoon } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 
 export default function Home() {
@@ -34,8 +34,8 @@ export default function Home() {
   };
 
   const features = [
-    { icon: <FaBookOpen className="text-4xl text-green-500 dark:text-green-400 mb-4" />, title: "9 Courses" },
-    { icon: <FaUsers className="text-4xl text-blue-500 dark:text-blue-400 mb-4" />, title: "4 User Roles" },
+    { icon: <FaBookOpen className="text-4xl text-green-500 dark:text-green-400 mb-4" />, title: "∞ Courses" },
+    { icon: <FaUsers className="text-4xl text-blue-500 dark:text-blue-400 mb-4" />, title: "5 User Roles" },
     { icon: <FaFileAlt className="text-4xl text-orange-500 dark:text-orange-400 mb-4" />, title: "∞ Tests" },
     { icon: <FaRobot className="text-4xl text-purple-500 dark:text-purple-400 mb-4" />, title: "AI Assistant" },
   ];
@@ -80,7 +80,7 @@ export default function Home() {
 
           {/* Description */}
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mb-12 animate-slide-up transition-colors duration-500" style={{ animationDelay: '0.2s' }}>
-            A comprehensive platform connecting students, teachers, parents, and administrators for enhanced educational experiences.
+            A comprehensive platform connecting students, instructors, and administrators for enhanced educational experiences.
           </p>
 
           {/* Feature Grid */}
@@ -130,27 +130,27 @@ export default function Home() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
-            {/* Parent Card */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-8 w-full">
+            {/* Reviewer Card */}
             <div className="bg-white/50 dark:bg-purple-900/10 p-8 rounded-3xl flex flex-col items-start transform hover:-translate-y-4 hover:shadow-[0_0_50px_rgba(168,85,247,0.2)] dark:hover:shadow-[0_0_50px_rgba(168,85,247,0.4)] transition-all duration-500 border border-purple-200 dark:border-purple-500/40 hover:bg-white dark:hover:bg-purple-900/20 group relative overflow-hidden backdrop-blur-md">
               <div className="absolute top-[-50%] right-[-50%] w-full h-full bg-purple-300/30 dark:bg-purple-500/20 blur-[80px] rounded-full group-hover:scale-150 transition-transform duration-700"></div>
               <div className="relative z-10 w-16 h-16 rounded-2xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(168,85,247,0.2)] dark:shadow-[0_0_20px_rgba(168,85,247,0.5)] border border-purple-200 dark:border-purple-400/30">
-                <FaUserFriends className="text-3xl text-purple-600 dark:text-purple-400 group-hover:text-purple-500 dark:group-hover:text-purple-300 group-hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] dark:group-hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                <FaCheckCircle className="text-3xl text-purple-600 dark:text-purple-400 group-hover:text-purple-500 dark:group-hover:text-purple-300 group-hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.4)] dark:group-hover:drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
               </div>
-              <h3 className="relative z-10 text-3xl font-bold text-slate-800 dark:text-white mb-3 transition-colors duration-500">Parent</h3>
+              <h3 className="relative z-10 text-3xl font-bold text-slate-800 dark:text-white mb-3 transition-colors duration-500">Reviewer</h3>
               <div className="relative z-10 text-purple-700 dark:text-purple-200 text-xs tracking-widest uppercase font-bold mb-5 bg-purple-200 dark:bg-purple-500/30 px-4 py-1.5 rounded-full border border-purple-300 dark:border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.1)] dark:shadow-[0_0_15px_rgba(168,85,247,0.3)]">Unlimited Users</div>
-              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Monitor your child's academic progress, track attendance, review assessments, and receive real-time notifications directly from the school.</p>
+              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Review instructor submissions, verify learning content, provide feedback, monitor quality, and help maintain academic standards across the platform.</p>
             </div>
 
-            {/* Teacher Card */}
+            {/* Instructor Card */}
             <div className="bg-white/50 dark:bg-orange-900/10 p-8 rounded-3xl flex flex-col items-start transform hover:-translate-y-4 hover:shadow-[0_0_50px_rgba(249,115,22,0.2)] dark:hover:shadow-[0_0_50px_rgba(249,115,22,0.4)] transition-all duration-500 border border-orange-200 dark:border-orange-500/40 hover:bg-white dark:hover:bg-orange-900/20 group relative overflow-hidden backdrop-blur-md">
               <div className="absolute top-[-50%] right-[-50%] w-full h-full bg-orange-300/30 dark:bg-orange-500/20 blur-[80px] rounded-full group-hover:scale-150 transition-transform duration-700"></div>
               <div className="relative z-10 w-16 h-16 rounded-2xl bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(249,115,22,0.2)] dark:shadow-[0_0_20px_rgba(249,115,22,0.5)] border border-orange-200 dark:border-orange-400/30">
-                <FaChalkboardTeacher className="text-3xl text-orange-600 dark:text-orange-400 group-hover:text-orange-500 dark:group-hover:text-orange-300 group-hover:drop-shadow-[0_0_10px_rgba(249,115,22,0.4)] dark:group-hover:drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
+                <FaUserTie className="text-3xl text-orange-600 dark:text-orange-400 group-hover:text-orange-500 dark:group-hover:text-orange-300 group-hover:drop-shadow-[0_0_10px_rgba(249,115,22,0.4)] dark:group-hover:drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
               </div>
-              <h3 className="relative z-10 text-3xl font-bold text-slate-800 dark:text-white mb-3 transition-colors duration-500">Teacher</h3>
+              <h3 className="relative z-10 text-3xl font-bold text-slate-800 dark:text-white mb-3 transition-colors duration-500">Instructor</h3>
               <div className="relative z-10 text-orange-700 dark:text-orange-200 text-xs tracking-widest uppercase font-bold mb-5 bg-orange-200 dark:bg-orange-500/30 px-4 py-1.5 rounded-full border border-orange-300 dark:border-orange-400/50 shadow-[0_0_15px_rgba(249,115,22,0.1)] dark:shadow-[0_0_15px_rgba(249,115,22,0.3)]">Unlimited Users</div>
-              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Create and manage content, build adaptive assessments, grade submissions, and view detailed analytics on individual student performance.</p>
+              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Create and manage courses, upload learning materials, build assessments, track student progress, and manage course-related learning activities.</p>
             </div>
 
             {/* Student Card */}
@@ -161,7 +161,15 @@ export default function Home() {
               </div>
               <h3 className="relative z-10 text-3xl font-bold text-slate-800 dark:text-white mb-3 transition-colors duration-500">Student</h3>
               <div className="relative z-10 text-blue-700 dark:text-blue-200 text-xs tracking-widest uppercase font-bold mb-5 bg-blue-200 dark:bg-blue-500/30 px-4 py-1.5 rounded-full border border-blue-300 dark:border-blue-400/50 shadow-[0_0_15px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(59,130,246,0.3)]">Unlimited Users</div>
-              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Engage deeply in courses, take adaptive tests, track your personal learning journey, and interact with the AI assistant for on-demand help.</p>
+              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Enroll in courses, access learning materials, complete assessments, track progress, view deadlines, and manage their personal learning journey.</p>
+            </div>
+
+            {/* Admin Card */}
+            <div className="bg-white/50 dark:bg-amber-900/10 p-8 rounded-3xl flex flex-col items-start transition-all duration-500 border border-amber-200 dark:border-amber-500/40 backdrop-blur-md">
+              <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center mb-6 border border-amber-200 dark:border-amber-400/30"><FaUsers className="text-3xl text-amber-600 dark:text-amber-400" /></div>
+              <h3 className="text-3xl font-bold text-slate-800 dark:text-white mb-3">Mentor</h3>
+              <div className="text-amber-700 dark:text-amber-200 text-xs tracking-widest uppercase font-bold mb-5 bg-amber-200 dark:bg-amber-500/30 px-4 py-1.5 rounded-full">Admin Assigned</div>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-medium">Guide assigned learners, monitor progress, provide feedback, and maintain mentoring-session history.</p>
             </div>
 
             {/* Admin Card */}
@@ -172,7 +180,7 @@ export default function Home() {
               </div>
               <h3 className="relative z-10 text-3xl font-bold text-slate-800 dark:text-white mb-3 transition-colors duration-500">Admin</h3>
               <div className="relative z-10 text-red-100 text-xs tracking-widest uppercase font-bold mb-5 bg-gradient-to-r from-red-600 to-red-500 px-4 py-1.5 rounded-full border border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)] dark:shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse">Only One Admin</div>
-              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Oversee the entire educational system, manage users across all roles, control the global course catalog, and analyze system-wide analytics.</p>
+              <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-relaxed font-medium transition-colors duration-500">Manage users, approve instructors, monitor courses and platform activity, review verification requests, and manage the overall learning system.</p>
             </div>
           </div>
         </div>

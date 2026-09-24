@@ -1,247 +1,26 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { createElement, useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { HiOutlineArrowRight, HiOutlineBookOpen, HiOutlineCalendar, HiOutlineChartBar, HiOutlineClipboardCheck, HiOutlineFire, HiOutlineStar } from 'react-icons/hi';
+import { HiOutlineRocketLaunch } from 'react-icons/hi2';
 import { studentAPI } from '../../services/apiService';
-import StatCard from '../../components/common/StatCard';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { useAuth } from '../../hooks/useAuth';
-import toast from 'react-hot-toast';
-import { HiOutlineBookOpen, HiOutlineClipboardCheck, HiOutlineChartBar, HiOutlineCalendar, HiOutlineStar, HiOutlineBell, HiOutlineExclamation, HiOutlineRefresh, HiOutlineCheckCircle, HiOutlineClock, HiOutlineFire, HiOutlineArrowRight, HiOutlineClipboardList, HiOutlineLightBulb } from 'react-icons/hi';
 
-export default function StudentDashboard() {
-    const { user } = useAuth();
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [refreshing, setRefreshing] = useState(false);
+const Title=({icon,title,subtitle})=><div className="sd-title"><span>{createElement(icon)}</span><div><h2>{title}</h2><p>{subtitle}</p></div></div>;
+const StatCard=({item,navigate})=><button className="sd-stat" onClick={()=>navigate(item.to)}><span className={`sd-stat-icon ${item.tone}`}><item.icon/></span><span><small>{item.title}</small><strong>{item.value}</strong></span></button>;
 
-    const loadDashboardData = async (showRefreshLoading = false) => {
-        try {
-            if (showRefreshLoading) setRefreshing(true);
-            const res = await studentAPI.getDashboard();
-            setData(res.data.data);
-            setError(null);
-        } catch (err) {
-            console.error('Dashboard load error:', err);
-            setError(err.response?.data?.message || 'Failed to load dashboard data');
-            toast.error('Failed to load dashboard data');
-        } finally {
-            setLoading(false);
-            if (showRefreshLoading) setRefreshing(false);
-        }
-    };
+function Skeleton(){return <div className="student-dashboard sd-skeleton"><i className="sd-sk sd-sk-head"/><div className="sd-stats">{[1,2,3,4].map(i=><i className="sd-sk sd-sk-stat" key={i}/>)}</div><i className="sd-sk sd-sk-course"/><i className="sd-sk sd-sk-upcoming"/></div>}
 
-    useEffect(() => {
-        loadDashboardData();
-    }, []);
+function ContinueLearning({courses=[]}){return <section className="sd-section"><Title icon={HiOutlineBookOpen} title="Continue Learning" subtitle="Pick up right where you left off"/>{courses.length?<div className="sd-course-list">{courses.map(e=>{const c=e.course||{},p=Math.min(100,Math.max(0,+e.progress||0));return <article className="sd-course" key={e._id}><div className="sd-thumb">{c.thumbnail?<img src={c.thumbnail} alt=""/>:<HiOutlineBookOpen/>}</div><div className="sd-course-body"><div className="sd-course-head"><div><span>{c.category||c.code||'Course'}</span><h3>{c.name||'Course'}</h3>{c.instructor&&<p>with {c.instructor.firstName} {c.instructor.lastName}</p>}</div><strong>{p}% <small>complete</small></strong></div><div className="sd-progress" role="progressbar" aria-valuenow={p}><span style={{width:`${p}%`}}/></div><div className="sd-course-foot"><div><span>Next lesson</span><strong>{e.nextLesson?.title||'Continue where you left off'}</strong></div><Link to={`/student/courses/${c._id}`}>Continue <HiOutlineArrowRight/></Link></div></div></article>})}</div>:<div className="sd-empty-course"><span><HiOutlineRocketLaunch/></span><div><h3>Start your learning journey</h3><p>You haven't enrolled in a course yet. Explore courses and start building your skills.</p></div><Link to="/student/courses" className="sd-primary">Explore Courses <HiOutlineArrowRight/></Link></div>}</section>}
 
-    if (loading) return <LoadingSpinner />;
-
-    if (error) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-64 space-y-4">
-                <HiOutlineExclamation className="w-16 h-16 text-rose-500" />
-                <div className="text-center">
-                    <h3 className="text-lg font-semibold text-rose-600">Unable to load dashboard</h3>
-                    <p className="text-sm text-gray-600 mt-1">{error}</p>
-                </div>
-                <button
-                    onClick={() => loadDashboardData(true)}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                    disabled={refreshing}
-                >
-                    {refreshing ? 'Refreshing...' : 'Try Again'}
-                </button>
-            </div>
-        );
-    }
-
-    const stats = data?.stats || {};
-
-    return (
-        <div className="space-y-6">
-            {/* Welcome */}
-            <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                        Welcome back, {user?.firstName}! 👋
-                    </h1>
-                    <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                        Here's your learning progress overview
-                    </p>
-                </div>
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => loadDashboardData(true)}
-                        className="px-4 py-2 rounded-lg text-sm font-medium border transition-colors"
-                        style={{
-                            borderColor: 'var(--border-color)',
-                            color: 'var(--text-primary)',
-                            background: 'var(--bg-card)'
-                        }}
-                        disabled={refreshing}
-                    >
-                        {refreshing ? 'Refreshing...' : 'Refresh'}
-                    </button>
-                    <Link
-                        to="/student/courses"
-                        className="px-4 py-2 rounded-lg text-sm font-medium text-white gradient-primary hover:opacity-90 transition-opacity"
-                    >
-                        Browse Courses →
-                    </Link>
-                </div>
-            </div>
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                <StatCard title="Enrolled Courses" value={stats.totalCourses || 0} icon={HiOutlineBookOpen} color="indigo" />
-                <StatCard title="Tests Taken" value={stats.totalTests || 0} icon={HiOutlineClipboardCheck} color="emerald" />
-                <StatCard title="Avg Score" value={`${stats.avgScore || 0}%`} icon={HiOutlineChartBar} color="cyan" />
-                <StatCard title="Reward Points" value={stats.totalPoints || 0} icon={HiOutlineStar} color="violet" />
-                <StatCard title="Notifications" value={stats.unreadNotifications || 0} icon={HiOutlineBell} color="rose" />
-            </div>
-
-            {/* New Feature Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Completed Courses */}
-                <div className="rounded-xl p-5 hover:shadow-lg transition-shadow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                            <HiOutlineCheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>📘 Completed</p>
-                            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.completedCourses || 0}</p>
-                        </div>
-                    </div>
-                    <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Courses finished</p>
-                    <Link to="/student/courses" className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
-                        View Details <HiOutlineArrowRight className="w-3 h-3" />
-                    </Link>
-                </div>
-
-                {/* Topics Completed */}
-                <div className="rounded-xl p-5 hover:shadow-lg transition-shadow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                            <HiOutlineClipboardList className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>📖 Topics Completed</p>
-                            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.assessmentsCompleted || 0}</p>
-                        </div>
-                    </div>
-                    <div className="text-xs mb-3 truncate" style={{ color: 'var(--text-secondary)' }}>
-                        {stats.assessmentsBySubject && Object.keys(stats.assessmentsBySubject).length > 0 
-                            ? Object.entries(stats.assessmentsBySubject).map(([sub, count]) => `${sub}: ${count}`).join(' | ') 
-                            : 'No assessments completed'}
-                    </div>
-                    <Link to="/student/assessments" className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
-                        View Details <HiOutlineArrowRight className="w-3 h-3" />
-                    </Link>
-                </div>
-
-                {/* Flashcards Mastered */}
-                <div className="rounded-xl p-5 hover:shadow-lg transition-shadow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-                            <HiOutlineLightBulb className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>🧠 Flashcards Mastered</p>
-                            <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{stats.flashcardsMastered || 0}</p>
-                        </div>
-                    </div>
-                    <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Cards learned successfully</p>
-                    <Link to="/student/flashcards" className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
-                        View Details <HiOutlineArrowRight className="w-3 h-3" />
-                    </Link>
-                </div>
-
-                {/* Current Streak */}
-                <div className="rounded-xl p-5 hover:shadow-lg transition-shadow" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
-                            <HiOutlineFire className="w-6 h-6 text-rose-600 dark:text-rose-400" />
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>🔥 Streak</p>
-                            <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">{stats.currentStreak || 0}</p>
-                        </div>
-                    </div>
-                    <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Days active</p>
-                    <Link to="/student/rewards" className="text-xs font-medium text-indigo-500 hover:text-indigo-600 flex items-center gap-1">
-                        View Details <HiOutlineArrowRight className="w-3 h-3" />
-                    </Link>
-                </div>
-            </div>
-
-
-
-            {/* Recent courses & notifications */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div
-                    className="rounded-xl p-5"
-                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}
-                >
-                    <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>📚 Enrolled Courses</h3>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {(data?.recentCourses || []).map((e) => (
-                            <div
-                                key={e._id}
-                                className="p-3 rounded-lg"
-                                style={{ background: 'var(--bg-tertiary)' }}
-                            >
-                                <div className="flex items-center justify-between mb-2">
-                                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                                        {e.course?.name || 'Course'}
-                                    </p>
-                                    <span className="text-xs font-semibold text-indigo-500">{e.progress || 0}%</span>
-                                </div>
-                                <div className="w-full h-2 rounded-full mb-2" style={{ background: 'var(--border-color)' }}>
-                                    <div
-                                        className="h-full rounded-full gradient-primary transition-all"
-                                        style={{ width: `${e.progress || 0}%` }}
-                                    />
-                                </div>
-                                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                    {e.course?.code || 'N/A'}
-                                </p>
-                            </div>
-                        ))}
-                        {(!data?.recentCourses || data.recentCourses.length === 0) && (
-                            <p className="text-sm text-center py-4" style={{ color: 'var(--text-muted)' }}>
-                                No courses enrolled yet. <Link to="/student/courses" className="text-indigo-500">Browse courses</Link>
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                <div
-                    className="rounded-xl p-5"
-                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}
-                >
-                    <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>🔔 Recent Notifications</h3>
-                    <div className="space-y-3">
-                        {(data?.recentNotifications || []).map((n) => (
-                            <div
-                                key={n._id}
-                                className="p-3 rounded-lg flex items-start gap-3"
-                                style={{ background: 'var(--bg-tertiary)' }}
-                            >
-                                <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${n.type === 'warning' ? 'bg-amber-500' : n.type === 'success' ? 'bg-emerald-500' : 'bg-indigo-500'
-                                    }`} />
-                                <div>
-                                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{n.title}</p>
-                                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{n.message}</p>
-                                </div>
-                            </div>
-                        ))}
-                        {(!data?.recentNotifications || data.recentNotifications.length === 0) && (
-                            <p className="text-sm text-center py-4" style={{ color: 'var(--text-muted)' }}>No new notifications</p>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+function UpcomingAssessments({items=[]}){
+ const dueLabel=value=>{const due=new Date(value),today=new Date();today.setHours(0,0,0,0);const days=Math.ceil((due-today)/86400000);if(days===0)return 'Due today';if(days===1)return 'Due tomorrow';return `Due ${due.toLocaleDateString(undefined,{month:'short',day:'numeric'})}`};
+ const typeLabel=type=>type==='topic_test'?'Topic test':type==='final'?'Final assessment':'Practice quiz';
+ return <section className="sd-section sd-upcoming"><Title icon={HiOutlineCalendar} title="Upcoming Assessments & Deadlines" subtitle="Stay on top of your upcoming work"/>{items.length?<div className="sd-deadline-list">{items.map(item=><article className="sd-deadline" key={item._id}><span className={`sd-deadline-icon ${item.type}`}><HiOutlineClipboardCheck/></span><div className="sd-deadline-main"><div><span>{typeLabel(item.type)}</span><h3>{item.title}</h3><p>{item.course?.name}{item.topic && <> {'\\u00b7'} {item.topic}</>}</p></div><div className="sd-due"><strong>{dueLabel(item.endDate)}</strong><time dateTime={item.endDate}>{new Date(item.endDate).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</time></div><Link to="/student/assessments" className="sd-deadline-action">{item.type==='practice'?'Attempt quiz':'Start assessment'} <HiOutlineArrowRight/></Link></div></article>)}</div>:<div className="sd-all-caught-up"><span>{String.fromCodePoint(127881)}</span><h3>You're all caught up!</h3><p>No upcoming assessments or deadlines right now.<br/>Keep learning and check back later.</p></div>}</section>
+}
+export default function StudentDashboard(){
+ const {user}=useAuth(),navigate=useNavigate();const [data,setData]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(false);
+ const load=useCallback(async()=>{setError(false);try{const r=await studentAPI.getDashboard();setData(r.data.data)}catch(e){console.error('Dashboard load error:',e);setError(true)}finally{setLoading(false)}},[]);useEffect(()=>{load()},[load]);
+ if(loading)return <Skeleton/>;if(error)return <div className="sd-error"><span>!</span><h2>Couldn't load your learning progress.</h2><p>Your dashboard hit a small snag. Please try again.</p><button onClick={()=>{setLoading(true);load()}}>Try Again</button></div>;
+ const s=data?.stats||{};const stats=[['Assessments Taken',s.totalTests||0,HiOutlineClipboardCheck,'indigo','/student/assessments'],['Average Score',`${s.avgScore||0}%`,HiOutlineChartBar,'cyan','/student/performance'],['Learning Streak',`${s.currentStreak||0} Days`,HiOutlineFire,'rose','/student/learning-journey'],['Reward Points',s.totalPoints||0,HiOutlineStar,'amber','/student/rewards']].map(([title,value,icon,tone,to])=>({title,value,icon,tone,to}));
+ return <div className="student-dashboard"><i className="sd-glow one"/><i className="sd-glow two"/><header className="sd-header"><div><p>Your learning space</p><h1>Welcome back, {user?.firstName||'Student'}! <span aria-hidden="true">&#128075;</span></h1><span>Here's your learning progress today.</span></div></header><div className="sd-stats">{stats.map(x=><StatCard item={x} navigate={navigate} key={x.title}/>)}</div><ContinueLearning courses={data?.recentCourses}/><UpcomingAssessments items={data?.upcomingAssessments}/></div>;
 }

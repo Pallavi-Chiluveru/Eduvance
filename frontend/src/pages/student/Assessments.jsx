@@ -79,7 +79,7 @@ export default function StudentAssessments() {
         try {
             const res = await studentAPI.getSubmissionReview(submissionId);
             setReviewData(res.data.data.submission);
-        } catch (err) {
+        } catch {
             toast.error('Failed to load review data');
         } finally {
             setLoading(false);
@@ -141,15 +141,15 @@ export default function StudentAssessments() {
                     setTimeRemaining(remainingSecs);
                     
                     if (remainingSecs <= 600 && remainingSecs > 595 && !lastNotified[10]) {
-                        toast('⚠️ Only 10 minutes remaining', { icon: '⏳' });
+                        toast('âš ï¸ Only 10 minutes remaining', { icon: 'â³' });
                         lastNotified[10] = true;
                     }
                     if (remainingSecs <= 300 && remainingSecs > 295 && !lastNotified[5]) {
-                        toast('⚠️ Only 5 minutes remaining', { icon: '⏳' });
+                        toast('âš ï¸ Only 5 minutes remaining', { icon: 'â³' });
                         lastNotified[5] = true;
                     }
                     if (remainingSecs <= 60 && remainingSecs > 55 && !lastNotified[1]) {
-                        toast('⚠️ Only 1 minute remaining!', { icon: '🚨', duration: 5000, style: { background: '#fee2e2', color: '#991b1b' } });
+                        toast('âš ï¸ Only 1 minute remaining!', { icon: 'ðŸš¨', duration: 5000, style: { background: '#fee2e2', color: '#991b1b' } });
                         lastNotified[1] = true;
                     }
                 } else {
@@ -158,7 +158,7 @@ export default function StudentAssessments() {
                     // Only trigger if we aren't already handling an auto-submit
                     setAutoSubmitTrigger(prev => {
                         if (!prev) {
-                            toast('Time is up! Auto-submitting...', { icon: '⌛' });
+                            toast('Time is up! Auto-submitting...', { icon: 'âŒ›' });
                             return true;
                         }
                         return prev;
@@ -192,7 +192,7 @@ export default function StudentAssessments() {
                     <div>
                         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{activeTest.title}</h1>
                         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                            {questions.length} questions · {activeTest.duration} min · {activeTest.totalMarks} marks
+                            {questions.length} questions Â· {activeTest.duration} min Â· {activeTest.totalMarks} marks
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -355,7 +355,7 @@ export default function StudentAssessments() {
                                 {ans.questionId?.explanation && (
                                     <div className="mt-6 p-4 rounded-xl border-l-4 border-indigo-500" style={{ background: 'rgba(99, 102, 241, 0.05)' }}>
                                         <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1 flex items-center gap-2">
-                                            💡 Explanation
+                                            ðŸ’¡ Explanation
                                         </p>
                                         <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                                             {ans.questionId.explanation}
@@ -378,7 +378,7 @@ export default function StudentAssessments() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>📝 Assessments</h1>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>ðŸ“ Assessments</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {assessments.map((a) => (
@@ -399,7 +399,7 @@ export default function StudentAssessments() {
                         <div className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
                             <div className="flex items-center gap-2"><HiOutlineClock className="w-4 h-4" />{a.duration} minutes</div>
                             <div className="flex items-center gap-2"><HiOutlineClipboardCheck className="w-4 h-4" />{a.totalMarks} marks (pass: {a.passingMarks})</div>
-                            <div>Attempts: {a.attempts || 0} / {a.maxAttempts >= 999 ? '∞' : a.maxAttempts}</div>
+                            <div>Attempts: {a.attempts || 0} / {a.maxAttempts >= 999 ? 'âˆž' : a.maxAttempts}</div>
                         </div>
                         <div className="flex gap-2 mt-4">
                             <button

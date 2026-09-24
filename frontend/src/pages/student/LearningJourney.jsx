@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { studentAPI } from '../../services/apiService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import ChartCard from '../../components/common/ChartCard';
+import ActivityHeatmap from '../../components/student/ActivityHeatmap';
 import { HiOutlineFire, HiOutlineCheckCircle, HiOutlineClock, HiOutlineTrendingUp, HiOutlineInformationCircle } from 'react-icons/hi';
 
 export default function LearningJourney() {
@@ -18,62 +18,12 @@ export default function LearningJourney() {
     if (loading) return <LoadingSpinner />;
 
     const { streak, activities } = data || {};
-    const activityMap = activities?.reduce((acc, curr) => {
-        acc[curr.dateString] = curr;
-        return acc;
-    }, {}) || {};
-
-    // Generate heatmap data (last 6 months)
-    const generateHeatmap = () => {
-        const today = new Date();
-        const days = [];
-        for (let i = 180; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(today.getDate() - i);
-            const dateStr = d.toISOString().split('T')[0];
-            days.push({
-                date: d,
-                dateString: dateStr,
-                activity: activityMap[dateStr] || null
-            });
-        }
-        return days;
-    };
-
-    const heatmapDays = generateHeatmap();
-
-    // Group heatmap by weeks for the grid
-    const weeks = [];
-    let currentWeek = [];
-    heatmapDays.forEach((day, i) => {
-        currentWeek.push(day);
-        if (day.date.getDay() === 6 || i === heatmapDays.length - 1) {
-            weeks.push(currentWeek);
-            currentWeek = [];
-        }
-    });
-
-    const getLevel = (points) => {
-        if (!points) return 0;
-        if (points >= 5) return 4;
-        if (points >= 3) return 3;
-        if (points >= 2) return 2;
-        return 1;
-    };
-
-    const colors = [
-        'var(--bg-tertiary)', // Level 0
-        '#c7d2fe', // Level 1 (Light Indigo)
-        '#818cf8', // Level 2
-        '#6366f1', // Level 3
-        '#4338ca', // Level 4 (Dark Indigo)
-    ];
 
     return (
         <div className="space-y-8 pb-12">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>🔥 My Learning Journey</h1>
+                    <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}><span aria-hidden="true">{String.fromCodePoint(128293)}</span> My Learning Journey</h1>
                     <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Consistency is the key to mastery. Keep the flame alive!</p>
                 </div>
                 <div className="flex items-center gap-3 bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-xl border border-indigo-100 dark:border-indigo-800">
@@ -121,43 +71,7 @@ export default function LearningJourney() {
                         <HiOutlineClock className="w-5 h-5 text-emerald-500" /> Activity Heatmap
                     </h3>
 
-                    <div className="overflow-x-auto pb-4 custom-scrollbar">
-                        <div className="inline-flex flex-col gap-1 min-w-max">
-                            <div className="flex gap-1">
-                                {weeks.map((week, wi) => (
-                                    <div key={wi} className="flex flex-col gap-1">
-                                        {/* Spacer to align Friday/Saturday etc if week is short */}
-                                        {wi === 0 && Array(7 - week.length).fill(0).map((_, i) => (
-                                            <div key={`s-${i}`} className="w-3.5 h-3.5" />
-                                        ))}
-                                        {week.map((day) => (
-                                            <div
-                                                key={day.dateString}
-                                                className="w-3.5 h-3.5 rounded-sm transition-all hover:scale-125 hover:shadow-xs cursor-help relative group"
-                                                style={{ backgroundColor: colors[getLevel(day.activity?.points)] }}
-                                            >
-                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-                                                    {day.date.toLocaleDateString()}: {day.activity?.points || 0} Action{day.activity?.points === 1 ? '' : 's'}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex justify-between mt-2 text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                                <span>6 Months Ago</span>
-                                <span>Today</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 flex items-center justify-end gap-2 text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                        <span>Less</span>
-                        {colors.map((c, i) => (
-                            <div key={i} className="w-3 h-3 rounded-sm" style={{ backgroundColor: c }} />
-                        ))}
-                        <span>More</span>
-                    </div>
+                    <ActivityHeatmap activities={activities || []} />
                 </div>
             </div>
 
@@ -166,7 +80,7 @@ export default function LearningJourney() {
                 <h3 className="text-sm font-bold uppercase tracking-widest mb-6" style={{ color: 'var(--text-muted)' }}>Recent Timeline</h3>
                 <div className="space-y-6 relative border-l-2 ml-4 pl-8" style={{ borderColor: 'var(--border-color)' }}>
                     {activities?.length > 0 ? (
-                        activities.slice().reverse().slice(0, 5).map((dayRec, idx) => (
+                        activities.slice().reverse().slice(0, 5).map((dayRec) => (
                             <div key={dayRec._id} className="relative">
                                 <div className="absolute -left-[41px] top-1 p-1 rounded-full bg-white dark:bg-[#1e1e1e] border-2 border-indigo-500 z-10 transition-transform hover:scale-110">
                                     <HiOutlineCheckCircle className="w-4 h-4 text-indigo-500" />

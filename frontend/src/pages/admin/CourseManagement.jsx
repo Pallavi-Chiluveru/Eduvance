@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { HiOutlinePlus, HiOutlineBookOpen, HiOutlineUsers } from 'react-icons/hi';
 
 export default function CourseManagement() {
+    const [error, setError] = useState('');
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCreate, setShowCreate] = useState(false);
@@ -12,13 +13,21 @@ export default function CourseManagement() {
 
     const load = async () => {
         try {
+            setError('');
             const res = await adminAPI.getCourses();
             setCourses(res.data.data.courses || []);
-        } catch (err) { console.error(err); }
+        } catch { setError('Unable to load courses. Please try again.'); }
         finally { setLoading(false); }
     };
 
     useEffect(() => { load(); }, []);
+
+    const review = async (course, action) => {
+        const message = action === 'request_changes' ? window.prompt('Required changes') : '';
+        if (action === 'request_changes' && !message) return;
+        try { await adminAPI.reviewCourse(course._id, { action, message }); toast.success('Course updated'); load(); }
+        catch (err) { toast.error(err.response?.data?.message || 'Review failed'); }
+    };
 
     const handleCreate = async (e) => {
         e.preventDefault();
@@ -42,6 +51,7 @@ export default function CourseManagement() {
                 </button>
             </div>
 
+            {error && <p role="alert">{error} <button className="underline" onClick={load}>Try again</button></p>}
             {showCreate && (
                 <form onSubmit={handleCreate} className="rounded-xl p-5 space-y-4 animate-slide-up" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-md)' }}>
                     <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Create Course</h3>
@@ -69,15 +79,17 @@ export default function CourseManagement() {
                                     <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{c.code} · {c.category}</p>
                                 </div>
                             </div>
+                            <p className="text-xs capitalize mb-2" style={{ color: 'var(--text-muted)' }}>{c.status?.replaceAll('_', ' ')} ? Created {new Date(c.createdAt).toLocaleDateString()}</p>
                             <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>{c.description?.substring(0, 80)}</p>
                             <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
                                 <span className="flex items-center gap-1"><HiOutlineUsers className="w-4 h-4" />{c.studentCount || 0} students</span>
-                                <span>👨‍🏫 {c.teacher?.firstName || 'Unassigned'}</span>
+                                <span>👨‍🏫 {c.instructor?.firstName || 'Unassigned'}</span>
                             </div>
+                            <div className='flex gap-2 mt-4'>{['submitted', 'pending_review'].includes(c.status) && <><button onClick={() => review(c, 'request_changes')}>Request Changes</button><button onClick={() => review(c, 'approve')} className='text-emerald-600'>Approve</button></>}{c.status === 'approved' && <button onClick={() => review(c, 'publish')} className='text-emerald-600'>Publish</button>}{c.status === 'published' && <button onClick={() => review(c, 'archive')}>Archive</button>}</div>
                         </div>
                     </div>
                 ))}
-                {courses.length === 0 && <p className="col-span-full text-center py-12" style={{ color: 'var(--text-muted)' }}>No courses yet</p>}
+                {courses.length === 0 && !error && <p className="col-span-full text-center py-12" style={{ color: 'var(--text-muted)' }}>No courses available.</p>}
             </div>
         </div>
     );
