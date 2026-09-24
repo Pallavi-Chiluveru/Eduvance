@@ -1,6 +1,9 @@
 
 # 🏗️ Project Architecture
 
+This document outlines the high-level architecture of the application, including the Frontend, Backend, Database, and User Roles.
+
+```mermaid
 %%{init: {
   "theme": "base",
   "flowchart": {
@@ -224,6 +227,7 @@ class API,AUTHAPI,COURSE,ASSESS,LEARNING,REVIEW,ANALYTICS backend;
 class AI1,AI2,AI3 ai;
 
 class USERSDB,COURSEDB,ASSESSDB,LEARNDB,REVIEWDB,CERTDB database;
+```
 
 ## Description of Architecture
 
