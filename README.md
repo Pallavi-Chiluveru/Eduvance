@@ -1,10 +1,10 @@
 # Digital Learning Support and Evaluation System (DLSES)
 
-DLSES is a comprehensive educational platform designed to bridge the gap between students, teachers, parents, and administrators. It provides a robust environment for course management, assessments, and AI-driven learning assistance.
+DLSES is a comprehensive educational platform designed to connect students, instructors, instructors, and administrators. It provides a robust environment for course management, assessments, and AI-driven learning assistance.
 
 ## 🚀 Key Features
 
-- **Multi-Role Dashboards**: Tailored experiences for Students, Teachers, Parents, and Admins.
+- **Multi-Role Dashboards**: Tailored experiences for Students, Instructors, Instructors, and Admins.
 - **Course Management**: Effortlessly organize and access educational content.
 - **Secure Assessments**: Integrated testing and grading modules.
 - **AI Learning Assistant**: Real-time support for subject-specific queries.

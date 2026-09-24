@@ -26,7 +26,7 @@ const demonstrate = async () => {
         const firstCourse = enrollments[0].course;
         console.log(`Using course for demo: ${firstCourse.name} (${firstCourse.code})`);
 
-        const teacher = await User.findOne({ role: 'teacher' });
+        const instructor = await User.findOne({ role: 'instructor' });
 
         // Function to create an assessment
         const createDemoAssessment = async (title, type) => {
@@ -39,7 +39,7 @@ const demonstrate = async () => {
                 totalMarks: 10,
                 passingMarks: 4,
                 duration: 10,
-                createdBy: teacher._id,
+                createdBy: instructor._id,
                 isPublished: true,
                 isActive: true
             });

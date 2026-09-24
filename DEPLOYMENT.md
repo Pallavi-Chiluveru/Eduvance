@@ -1,7 +1,6 @@
 # 🚀 Deployment Guide
 
 This guide provides step-by-step instructions for deploying the Eduvance project. We will deploy the **Backend to Render** and the **Frontend to Vercel**.
-
 ---
 
 ## 1. ⚙️ Backend Deployment (Render)
@@ -75,3 +74,5 @@ git commit -m "chore: prepare for deployment (CORS and API URL config)"
 # Push to GitHub
 git push origin main
 ```
+
+------

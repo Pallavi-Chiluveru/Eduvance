@@ -18,6 +18,11 @@ const assessmentSchema = new mongoose.Schema(
             enum: ['practice', 'topic_test', 'final'],
             required: true,
         },
+        assessmentType: {
+            type: String,
+            enum: ['quiz', 'assignment', 'evaluation'],
+            default: 'quiz',
+        },
         description: String,
         instructions: String,
         totalMarks: {

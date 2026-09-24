@@ -14,18 +14,18 @@ async function seed() {
         await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/dlses');
         console.log('Connected to MongoDB');
 
-        // 1. Find or create a teacher
-        let teacher = await User.findOne({ role: 'teacher' });
-        if (!teacher) {
-            teacher = await User.create({
+        // 1. Find or create a instructor
+        let instructor = await User.findOne({ role: 'instructor' });
+        if (!instructor) {
+            instructor = await User.create({
                 firstName: 'Demo',
-                lastName: 'Teacher',
+                lastName: 'Instructor',
                 studentId: 'T1001',
-                email: 'teacher@demo.com',
+                email: 'instructor@demo.com',
                 password: 'password123', // In a real app, hash this
-                role: 'teacher'
+                role: 'instructor'
             });
-            console.log('Created demo teacher');
+            console.log('Created demo instructor');
         }
 
         // 2. Create Students
@@ -51,7 +51,7 @@ async function seed() {
                 name: 'Data Structures & Algorithms',
                 code: 'DSA101',
                 description: 'Core concepts of DSA',
-                teacher: teacher._id,
+                instructor: instructor._id,
                 chapters: ['Introduction', 'Arrays', 'Linked Lists', 'Stacks', 'Trees']
             });
         }
@@ -79,7 +79,7 @@ async function seed() {
                     totalMarks: 50,
                     passingMarks: 20,
                     duration: 30,
-                    createdBy: teacher._id,
+                    createdBy: instructor._id,
                     isPublished: true
                 });
             }
@@ -110,7 +110,7 @@ async function seed() {
                 const status = Math.random() > 0.1 ? 'present' : 'absent';
                 await Attendance.findOneAndUpdate(
                     { student: s._id, course: course._id, date: date.toISOString().split('T')[0] },
-                    { status, markedBy: teacher._id },
+                    { status, markedBy: instructor._id },
                     { upsert: true }
                 );
             }
@@ -118,7 +118,7 @@ async function seed() {
         console.log('Attendance seeded');
 
         console.log('\nSeeding Complete!');
-        console.log('Email:', teacher.email);
+        console.log('Email:', instructor.email);
         console.log('Password: password123');
         process.exit(0);
     } catch (err) {

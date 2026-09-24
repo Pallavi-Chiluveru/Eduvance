@@ -1,6 +1,6 @@
 /**
  * Role-based access control middleware factory
- * Usage: authorize('admin', 'teacher')
+ * Usage: authorize('admin', 'instructor')
  */
 const authorize = (...roles) => {
     return (req, res, next) => {

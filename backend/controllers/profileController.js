@@ -7,7 +7,7 @@ const { uploadToCloudinary } = require('../utils/cloudinary');
  */
 exports.getProfile = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user._id).populate('children', 'firstName lastName email studentId');
+        const user = await User.findById(req.user._id);
         res.json({
             success: true,
             data: { user },

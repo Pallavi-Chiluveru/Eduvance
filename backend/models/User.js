@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
         },
         lastName: {
             type: String,
-            required: [true, 'Last name is required'],
+            default: '',
             trim: true,
             maxlength: 50,
         },
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ['student', 'teacher', 'parent', 'admin'],
+            enum: ['student', 'instructor', 'admin', 'reviewer', 'mentor'],
             required: [true, 'Role is required'],
         },
         avatar: {
@@ -53,17 +53,41 @@ const userSchema = new mongoose.Schema(
         learningStreak: { type: Number, default: 0 },
         bestStreak: { type: Number, default: 0 },
         lastActivityDate: Date,
-        // Parent-specific: linked children
-        children: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User',
-            },
-        ],
-        // Teacher-specific
+        // Instructor-specific
         department: String,
         specialization: String,
-        // Account status
+        instructorVerification: {
+            emailVerified: { type: Boolean, default: false },
+            emailVerificationCodeHash: { type: String, select: false },
+            emailVerificationExpires: { type: Date, select: false },
+            emailVerificationLastSentAt: { type: Date },
+            emailVerificationFailedAttempts: { type: Number, default: 0, min: 0 },
+            organization: { type: String, trim: true, maxlength: 150 },
+            expertise: { type: String, trim: true, maxlength: 200 },
+            qualification: { type: String, trim: true, maxlength: 200 },
+            experienceYears: { type: Number, min: 0, max: 70 },
+            bio: { type: String, trim: true, maxlength: 1200 },
+            professionalUrl: { type: String, trim: true },
+            resumeDocument: {
+                storageId: String, originalName: String, mimeType: String, size: Number,
+            },            proofDocument: {
+                storageId: String, originalName: String, mimeType: String, size: Number,
+            },
+            status: { type: String, enum: ['incomplete', 'pending', 'approved', 'rejected', 'changes_requested'], default: 'incomplete' },
+            submittedAt: Date, reviewedAt: Date,
+            reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            adminMessage: { type: String, maxlength: 1000 },
+            rejectionCount: { type: Number, default: 0, min: 0 },
+            rejectionWindowStartedAt: Date,
+            lastRejectedAt: Date,
+            reapplyAvailableAt: Date,
+            rejectionHistory: [{
+                _id: false, rejectedAt: Date,
+                rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+                reason: { type: String, maxlength: 1000 },
+            }],
+            submissionHistory: [{ _id: false, submittedAt: Date }],
+        },        // Account status
         isActive: {
             type: Boolean,
             default: true,
@@ -87,7 +111,7 @@ const userSchema = new mongoose.Schema(
 
 // Virtual for full name
 userSchema.virtual('fullName').get(function () {
-    return `${this.firstName} ${this.lastName}`;
+    return `${this.firstName} ${this.lastName || ''}`.trim();
 });
 
 // Index for common queries

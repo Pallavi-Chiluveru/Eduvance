@@ -50,7 +50,7 @@ const knowledgeBase = [
     {
         keywords: ['attendance', 'absent', 'present', 'late'],
         category: 'general',
-        response: 'Your attendance is tracked daily by your teachers. Check the Attendance section to see your percentage and subject-wise breakdown. An alert will appear if your attendance drops below 75%.',
+        response: 'Your attendance is tracked daily by your instructors. Check the Attendance section to see your percentage and subject-wise breakdown. An alert will appear if your attendance drops below 75%.',
     },
     {
         keywords: ['flashcard', 'study card', 'revision', 'spaced repetition'],

@@ -15,3 +15,6 @@ docker-compose.yaml
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Private instructor application documents
+backend/private-uploads/

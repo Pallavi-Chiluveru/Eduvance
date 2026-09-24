@@ -6,8 +6,7 @@
 
 #### **Frontend Enhancements**
 - **Student Dashboard**: Enhanced with real API integration, error handling, refresh functionality
-- **Teacher Dashboard**: Improved with student count per course, better error handling
-- **Parent Dashboard**: Added comprehensive child monitoring with error states
+- **Instructor Dashboard**: Improved with student count per course, better error handling
 - **Admin Dashboard**: Enhanced with system analytics and user management
 - **AI Chatbot**: Fully functional with chat history, error handling, and clear/refresh features
 - **Error Handling**: Comprehensive error boundaries and user feedback across all components
@@ -15,9 +14,8 @@
 - **Icon Fixes**: Fixed all import errors for React Icons
 
 #### **Backend Improvements**
-- **Teacher Controller**: Enhanced dashboard with student count per course for analytics
+- **Instructor Controller**: Enhanced dashboard with student count per course for analytics
 - **Admin Controller**: Comprehensive system statistics and user management
-- **Parent Controller**: Complete child performance monitoring
 - **Student Controller**: Full dashboard functionality with real-time data
 - **AI Chatbot**: **Gemini AI Integration** with rule-based fallback
 - **Error Handling**: Proper try-catch blocks and error responses
@@ -42,7 +40,7 @@
 ## 🚀 Quick Start Guide
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - MongoDB 5.0+
 - Git
 
@@ -83,15 +81,10 @@ After running the seed script, you can use these accounts:
 - **Password**: demo123
 - **Features**: Course enrollment, assessments, chatbot, performance tracking
 
-### Teacher Account
-- **Email**: teacher@demo.com
+### Instructor Account
+- **Email**: instructor@demo.com
 - **Password**: demo123
 - **Features**: Content management, assessment creation, grading, analytics
-
-### Parent Account
-- **Email**: parent@demo.com
-- **Password**: demo123
-- **Features**: Child monitoring, performance reports, attendance tracking
 
 ### Admin Account
 - **Email**: admin@demo.com
@@ -107,18 +100,12 @@ After running the seed script, you can use these accounts:
 - ✅ Recent notifications and course progress
 - ✅ Error handling and refresh functionality
 
-### Teacher Dashboard
+### Instructor Dashboard
 - ✅ Course management with student counts
 - ✅ Assessment creation and grading
 - ✅ Analytics with pie charts
 - ✅ Quick action buttons for common tasks
 - ✅ Content upload capabilities
-
-### Parent Dashboard
-- ✅ Multi-child support
-- ✅ Performance monitoring per child
-- ✅ Attendance tracking
-- ✅ Quick access to detailed reports
 
 ### Admin Dashboard
 - ✅ System-wide statistics
@@ -150,7 +137,7 @@ After running the seed script, you can use these accounts:
 - **HTTP Client**: Axios with interceptors
 
 ### Database Schema
-- **Users**: Role-based (Student, Teacher, Parent, Admin)
+- **Users**: Role-based (Student, Instructor, Instructor, Admin)
 - **Courses**: Subject management with chapters
 - **Assessments**: Tests and quizzes with questions
 - **Enrollments**: Student-course relationships
@@ -173,20 +160,14 @@ After running the seed script, you can use these accounts:
 4. Use AI chatbot for help
 5. Check attendance and rewards
 
-### 3. Teacher Features
+### 3. Instructor Features
 1. Upload course content (videos/PDFs)
 2. Create assessments with questions
 3. Grade student submissions
 4. View class analytics
 5. Mark attendance
 
-### 4. Parent Features
-1. View child's performance
-2. Monitor attendance
-3. Check recent activity
-4. Compare with class averages
-
-### 5. Admin Features
+### 4. Admin Features
 1. Create/manage user accounts
 2. Configure system settings
 3. View system analytics

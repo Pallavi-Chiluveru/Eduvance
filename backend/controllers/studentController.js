@@ -12,6 +12,8 @@ const Notification = require('../models/Notification');
 const ChatMessage = require('../models/ChatMessage');
 const Activity = require('../models/Activity'); // Added
 const User = require('../models/User'); // Added
+const MentorAssignment = require('../models/MentorAssignment');
+const MentorFeedback = require('../models/MentorFeedback');
 const { getResponse } = require('../utils/chatbot');
 const { streamFile } = require('../utils/fileStream');
 const path = require('path');
@@ -95,10 +97,10 @@ const updateDailyActivity = async (studentId, type, detail = '') => {
 
             // Award streak badges
             if (user.learningStreak === 7) {
-                await checkAndAwardBadge(studentId, 'streak_7', '7-Day Streak! 🔥', 'Maintained a 7-day learning streak', 50);
+                await checkAndAwardBadge(studentId, 'streak_7', '7-Day Streak! ðŸ”¥', 'Maintained a 7-day learning streak', 50);
             }
             if (user.learningStreak === 30) {
-                await checkAndAwardBadge(studentId, 'streak_30', '30-Day Streak! 🏆', 'Maintained a 30-day learning streak', 200);
+                await checkAndAwardBadge(studentId, 'streak_30', '30-Day Streak! ðŸ†', 'Maintained a 30-day learning streak', 200);
             }
         }
     } catch (err) {
@@ -114,8 +116,12 @@ exports.getDashboard = async (req, res, next) => {
     try {
         const studentId = req.user._id;
 
-        const [enrollments, submissions, attendanceRecords, rewards, notifications, assessments, results, flashcardsMastered] = await Promise.all([
-            Enrollment.find({ student: studentId }).populate('course', 'name code'),
+        const weekStart = new Date();
+        weekStart.setHours(0, 0, 0, 0);
+        weekStart.setDate(weekStart.getDate() - 6);
+
+        const [enrollments, submissions, attendanceRecords, rewards, notifications, assessments, results, flashcardsMastered, weeklyActivity] = await Promise.all([
+            Enrollment.find({ student: studentId }).populate({ path: 'course', select: 'name code description category thumbnail instructor', populate: { path: 'instructor', select: 'firstName lastName' } }),
             Submission.find({ student: studentId }).populate({
                 path: 'assessment',
                 populate: { path: 'course', select: 'name' }
@@ -125,9 +131,41 @@ exports.getDashboard = async (req, res, next) => {
             Notification.find({ user: studentId, isRead: false }).sort('-createdAt').limit(5),
             Assessment.find({ isPublished: true, isActive: true }).populate('course', 'name'),
             Result.find({ student: studentId, isPassed: true }).populate({ path: 'assessment', populate: { path: 'course', select: 'code name' } }),
-            Flashcard.countDocuments({ student: studentId, interval: { $gt: 1 } })
+            Flashcard.countDocuments({ student: studentId, interval: { $gt: 1 } }),
+            Activity.find({ student: studentId, date: { $gte: weekStart } }).sort('date')
         ]);
 
+        const courseIds = enrollments.filter(e => e.course).map(e => e.course._id);
+        const courseLectures = courseIds.length ? await Lecture.find({ course: { $in: courseIds }, isActive: true }).select('title topic course order').sort({ order: 1, createdAt: 1 }) : [];
+        const continueLearning = enrollments.filter(e => e.course && e.status !== 'dropped' && e.progress < 100).map(enrollment => {
+            const viewed = new Set((enrollment.viewedLectures || []).map(id => id.toString()));
+            const nextLesson = courseLectures.find(lecture => lecture.course.toString() === enrollment.course._id.toString() && !viewed.has(lecture._id.toString()));
+            return { ...enrollment.toObject(), nextLesson: nextLesson ? { _id: nextLesson._id, title: nextLesson.title, topic: nextLesson.topic } : null };
+        });
+        const activityByDate = new Map(weeklyActivity.map(item => [item.dateString, item.activities.length]));
+        const learningActivity = Array.from({ length: 7 }, (_, index) => {
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + index);
+            const dateString = date.toISOString().split('T')[0];
+            return { date: dateString, day: date.toLocaleDateString('en-US', { weekday: 'short' }), count: activityByDate.get(dateString) || 0 };
+        });
+
+        const enrolledCourseIds = new Set(enrollments.filter(e => e.course).map(e => e.course._id.toString()));
+        const now = new Date();
+        const upcomingAssessments = assessments
+            .filter(assessment => assessment.course && enrolledCourseIds.has(assessment.course._id.toString()) && assessment.endDate && new Date(assessment.endDate) >= now)
+            .sort((a, b) => new Date(a.endDate) - new Date(b.endDate))
+            .slice(0, 5)
+            .map(assessment => ({
+                _id: assessment._id,
+                title: assessment.title,
+                course: assessment.course,
+                topic: assessment.topic,
+                type: assessment.type,
+                startDate: assessment.startDate,
+                endDate: assessment.endDate,
+                duration: assessment.duration,
+            }));
         // Calculate stats
         const totalCourses = enrollments.length;
         const totalTests = submissions.length;
@@ -140,7 +178,11 @@ exports.getDashboard = async (req, res, next) => {
         const attendancePercent =
             attendanceRecords.length > 0 ? Math.round((presentCount / attendanceRecords.length) * 100) : 100;
 
-        const totalPoints = rewards.reduce((sum, r) => sum + r.points, 0);
+        // The dashboard shows learning-earned points, not the automatic welcome bonus.
+        // The reward record remains untouched and is still available on the Rewards page.
+        const totalPoints = rewards
+            .filter((reward) => reward.badge !== 'first_login')
+            .reduce((sum, reward) => sum + reward.points, 0);
 
         // New stats
         // Completed courses (progress = 100%)
@@ -209,7 +251,9 @@ exports.getDashboard = async (req, res, next) => {
                     flashcardsMastered,
                     currentStreak,
                 },
-                recentCourses: enrollments,
+                recentCourses: continueLearning,
+                learningActivity,
+                upcomingAssessments,
                 recentNotifications: notifications,
             },
         });
@@ -224,10 +268,10 @@ exports.getDashboard = async (req, res, next) => {
 exports.getCourses = async (req, res, next) => {
     try {
         const enrollments = await Enrollment.find({ student: req.user._id })
-            .populate('course', 'name code description category chapters thumbnail teacher')
+            .populate('course', 'name code description fullDescription category topics chapters modules thumbnail difficulty language durationHours prerequisites learningOutcomes instructor status isActive')
             .populate({
                 path: 'course',
-                populate: { path: 'teacher', select: 'firstName lastName' },
+                populate: { path: 'instructor', select: 'firstName lastName' },
             });
 
         res.json({ success: true, data: { enrollments } });
@@ -244,8 +288,8 @@ exports.getAvailableCourses = async (req, res, next) => {
         const enrolled = await Enrollment.find({ student: req.user._id }).select('course');
         const enrolledIds = enrolled.map((e) => e.course);
 
-        const courses = await Course.find({ _id: { $nin: enrolledIds }, isActive: true })
-            .populate('teacher', 'firstName lastName');
+        const courses = await Course.find({ _id: { $nin: enrolledIds }, status: 'published', isActive: true })
+            .populate('instructor', 'firstName lastName');
 
         res.json({ success: true, data: { courses } });
     } catch (error) {
@@ -258,7 +302,7 @@ exports.getAvailableCourses = async (req, res, next) => {
  */
 exports.enrollCourse = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.courseId);
+        const course = await Course.findOne({ _id: req.params.courseId, status: 'published', isActive: true });
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
@@ -284,6 +328,10 @@ exports.enrollCourse = async (req, res, next) => {
  */
 exports.getLectures = async (req, res, next) => {
     try {
+        const enrollment = await Enrollment.findOne({ student: req.user._id, course: req.params.courseId, status: { $ne: 'dropped' } });
+        if (!enrollment) return res.status(403).json({ success: false, message: 'Enroll in this course to access its content' });
+        const course = await Course.findOne({ _id: req.params.courseId, status: 'published', isActive: true }).select('modules');
+        if (!course) return res.status(404).json({ success: false, message: 'Published course not found' });
         const lectures = await Lecture.find({ course: req.params.courseId, isActive: true })
             .sort('topic order')
             .populate('uploadedBy', 'firstName lastName');
@@ -295,7 +343,7 @@ exports.getLectures = async (req, res, next) => {
             grouped[l.topic].push(l);
         });
 
-        res.json({ success: true, data: { lectures: grouped } });
+        res.json({ success: true, data: { lectures: grouped, modules: course.modules } });
     } catch (error) {
         next(error);
     }
@@ -339,7 +387,7 @@ exports.viewLecture = async (req, res, next) => {
                 await Reward.create({
                     student: req.user._id,
                     type: 'points',
-                    title: 'Lecture Watched! 📚',
+                    title: 'Lecture Watched! ðŸ“š',
                     description: `Watched: ${lecture.title}`,
                     points: 5,
                     course: lecture.course,
@@ -350,7 +398,7 @@ exports.viewLecture = async (req, res, next) => {
                     await Reward.create({
                         student: req.user._id,
                         type: 'points',
-                        title: 'Course Completed! 🎓',
+                        title: 'Course Completed! ðŸŽ“',
                         description: 'Completed 100% of course lectures',
                         points: 100,
                         course: lecture.course,
@@ -358,7 +406,7 @@ exports.viewLecture = async (req, res, next) => {
                     await checkAndAwardBadge(
                         req.user._id,
                         'course_complete',
-                        'Course Champion 🎓',
+                        'Course Champion ðŸŽ“',
                         'Completed all lectures in a course',
                         0
                     );
@@ -407,7 +455,7 @@ exports.getLecturePDF = async (req, res, next) => {
  */
 exports.getAssessments = async (req, res, next) => {
     try {
-        const enrolled = await Enrollment.find({ student: req.user._id }).populate('course', 'name teacher');
+        const enrolled = await Enrollment.find({ student: req.user._id }).populate('course', 'name instructor');
         const courseIds = enrolled.map((e) => e.course ? e.course._id : null).filter(Boolean);
 
         const { type } = req.query;
@@ -431,7 +479,7 @@ exports.getAssessments = async (req, res, next) => {
                 if (!enrollment.course) continue;
                 const courseId = enrollment.course._id;
                 const courseName = enrollment.course.name;
-                const teacherId = enrollment.course.teacher || req.user._id;
+                const instructorId = enrollment.course.instructor || req.user._id;
 
                 let finalAssessment = await Assessment.findOne({ course: courseId, type: 'final' });
                 
@@ -453,7 +501,7 @@ exports.getAssessments = async (req, res, next) => {
                         passingMarks: Math.floor(totalMarks * 0.5),
                         duration: duration,
                         maxAttempts: 999,
-                        createdBy: teacherId,
+                        createdBy: instructorId,
                         isPublished: true,
                         isActive: true
                     });
@@ -718,7 +766,7 @@ exports.submitTest = async (req, res, next) => {
             await Reward.create({
                 student: req.user._id,
                 type: 'points',
-                title: percentage === 100 ? 'Perfect Score! 🌟' : percentage >= 90 ? 'Excellent Score! 🥇' : percentage >= 80 ? 'High Score! 🥈' : 'Quiz Passed! ✅',
+                title: percentage === 100 ? 'Perfect Score! ðŸŒŸ' : percentage >= 90 ? 'Excellent Score! ðŸ¥‡' : percentage >= 80 ? 'High Score! ðŸ¥ˆ' : 'Quiz Passed! âœ…',
                 description: `Scored ${percentage}% on ${assessment.title}`,
                 points: percentage === 100 ? 70 : percentage >= 90 ? 50 : percentage >= 80 ? 30 : 10,
                 course: assessment.course,
@@ -730,7 +778,7 @@ exports.submitTest = async (req, res, next) => {
             await checkAndAwardBadge(
                 req.user._id,
                 'perfect_score',
-                'Perfect Score! 🌟',
+                'Perfect Score! ðŸŒŸ',
                 `Achieved 100% on ${assessment.title}`,
                 20
             );
@@ -951,7 +999,7 @@ exports.createFlashcard = async (req, res, next) => {
         await Reward.create({
             student: req.user._id,
             type: 'points',
-            title: 'Flashcard Created! 🗂️',
+            title: 'Flashcard Created! ðŸ—‚ï¸',
             description: `Created a new flashcard: "${front.substring(0, 30)}..."`,
             points: 2,
             course: course || undefined,
@@ -997,7 +1045,7 @@ exports.reviewFlashcard = async (req, res, next) => {
         await Reward.create({
             student: req.user._id,
             type: 'points',
-            title: 'Flashcard Reviewed! 🔁',
+            title: 'Flashcard Reviewed! ðŸ”',
             description: 'Completed a spaced repetition review',
             points: 1,
         });
@@ -1101,6 +1149,16 @@ exports.markNotificationRead = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+exports.getMentorFeedback = async (req, res, next) => {
+    try {
+        const [assignment, feedback] = await Promise.all([
+            MentorAssignment.findOne({ student: req.user._id, status: 'active' }).populate('mentor', 'firstName lastName email avatar specialization'),
+            MentorFeedback.find({ student: req.user._id }).populate('mentor', 'firstName lastName avatar').populate('course', 'name code').sort('-createdAt'),
+        ]);
+        res.json({ success: true, data: { mentor: assignment?.mentor || null, assignedAt: assignment?.assignedAt || null, feedback } });
+    } catch (error) { next(error); }
 };
 
 /**

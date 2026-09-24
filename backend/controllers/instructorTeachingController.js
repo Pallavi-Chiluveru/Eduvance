@@ -8,17 +8,19 @@ const Enrollment = require('../models/Enrollment');
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const CourseReview = require('../models/CourseReview');
+const Category = require('../models/Category');
 const { streamFile } = require('../utils/fileStream');
 const path = require('path');
 
 /**
- * GET /api/teacher/dashboard
+ * GET /api/instructor/dashboard
  */
 exports.getDashboard = async (req, res, next) => {
     try {
-        const teacherId = req.user._id;
+        const instructorId = req.user._id;
 
-        const courses = await Course.find({ teacher: teacherId });
+        const courses = await Course.find({ instructor: instructorId });
         const courseIds = courses.map((c) => c._id);
 
         // Get student count for each course
@@ -32,11 +34,11 @@ exports.getDashboard = async (req, res, next) => {
             })
         );
 
-        const assessmentIds = await Assessment.find({ createdBy: teacherId }).select('_id');
+        const assessmentIds = await Assessment.find({ createdBy: instructorId }).select('_id');
 
         const [totalStudents, totalAssessments, recentSubmissions, pendingGrading] = await Promise.all([
             Enrollment.countDocuments({ course: { $in: courseIds } }),
-            Assessment.countDocuments({ createdBy: teacherId }),
+            Assessment.countDocuments({ createdBy: instructorId }),
             Submission.find({ assessment: { $in: assessmentIds } })
                 .populate('student', 'firstName lastName')
                 .populate('assessment', 'title')
@@ -67,13 +69,13 @@ exports.getDashboard = async (req, res, next) => {
 };
 
 /**
- * POST /api/teacher/upload-content
+ * POST /api/instructor/upload-content
  */
 exports.uploadContent = async (req, res, next) => {
     try {
         const { title, courseId, chapter, type, videoUrl, description, duration } = req.body;
 
-        const course = await Course.findOne({ _id: courseId, teacher: req.user._id });
+        const course = await Course.findOne({ _id: courseId, instructor: req.user._id });
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found or not assigned to you' });
         }
@@ -83,6 +85,7 @@ exports.uploadContent = async (req, res, next) => {
             course: courseId,
             chapter,
             type,
+            assessmentType,
             description,
             duration,
             uploadedBy: req.user._id,
@@ -117,7 +120,7 @@ exports.uploadContent = async (req, res, next) => {
 };
 
 /**
- * POST /api/teacher/create-assessment
+ * POST /api/instructor/create-assessment
  */
 exports.createAssessment = async (req, res, next) => {
     try {
@@ -126,6 +129,7 @@ exports.createAssessment = async (req, res, next) => {
             course: courseId,
             chapter,
             type,
+            assessmentType = 'quiz',
             description,
             instructions,
             totalMarks,
@@ -137,7 +141,7 @@ exports.createAssessment = async (req, res, next) => {
             questions,
         } = req.body;
 
-        const course = await Course.findOne({ _id: courseId, teacher: req.user._id });
+        const course = await Course.findOne({ _id: courseId, instructor: req.user._id });
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found or not assigned to you' });
         }
@@ -147,6 +151,7 @@ exports.createAssessment = async (req, res, next) => {
             course: courseId,
             chapter,
             type,
+            assessmentType,
             description,
             instructions,
             totalMarks,
@@ -176,12 +181,12 @@ exports.createAssessment = async (req, res, next) => {
 };
 
 /**
- * GET /api/teacher/submissions
+ * GET /api/instructor/submissions
  * Get submissions pending grading
  */
 exports.getSubmissions = async (req, res, next) => {
     try {
-        const courses = await Course.find({ teacher: req.user._id }).select('_id');
+        const courses = await Course.find({ instructor: req.user._id }).select('_id');
         const courseIds = courses.map(c => c._id);
         const assessmentIds = await Assessment.find({ course: { $in: courseIds } }).distinct('_id');
 
@@ -201,7 +206,7 @@ exports.getSubmissions = async (req, res, next) => {
 };
 
 /**
- * PUT /api/teacher/grade/:submissionId
+ * PUT /api/instructor/grade/:submissionId
  * Grade a submission (for descriptive questions)
  */
 exports.gradeSubmission = async (req, res, next) => {
@@ -258,18 +263,6 @@ exports.gradeSubmission = async (req, res, next) => {
             type: 'result',
         });
 
-        // Notify parent
-        const student = await User.findById(submission.student).select('firstName lastName');
-        const parent = await User.findOne({ children: submission.student, role: 'parent' });
-        if (parent) {
-            await Notification.create({
-                user: parent._id,
-                title: 'Child Test Result',
-                message: `${student?.firstName || 'Your child'} ${student?.lastName || ''} scored ${submission.percentage}% on "${assessment.title}"`,
-                type: 'result',
-            });
-        }
-
         res.json({ success: true, data: { submission } });
     } catch (error) {
         next(error);
@@ -277,11 +270,11 @@ exports.gradeSubmission = async (req, res, next) => {
 };
 
 /**
- * GET /api/teacher/analytics
+ * GET /api/instructor/analytics
  */
 exports.getAnalytics = async (req, res, next) => {
     try {
-        const courses = await Course.find({ teacher: req.user._id });
+        const courses = await Course.find({ instructor: req.user._id });
         const courseIds = courses.map((c) => c._id);
 
         const [assessments, attendanceRecords] = await Promise.all([
@@ -381,14 +374,14 @@ exports.getAnalytics = async (req, res, next) => {
 };
 
 /**
- * POST /api/teacher/attendance
+ * POST /api/instructor/attendance
  */
 exports.markAttendance = async (req, res, next) => {
     try {
         const { courseId, date, records } = req.body;
         // records: [{ studentId, status }]
 
-        const course = await Course.findOne({ _id: courseId, teacher: req.user._id });
+        const course = await Course.findOne({ _id: courseId, instructor: req.user._id });
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
@@ -422,29 +415,6 @@ exports.markAttendance = async (req, res, next) => {
             }));
             await Notification.insertMany(studentNotifications);
 
-            // Notify parents of absent students
-            const absentStudentIds = absentStudents.map(r => r.studentId);
-            const students = await User.find({ _id: { $in: absentStudentIds } }).select('firstName lastName');
-            const parents = await User.find({ children: { $in: absentStudentIds }, role: 'parent' });
-
-            const parentNotifications = [];
-            parents.forEach(parent => {
-                parent.children.forEach(childId => {
-                    if (absentStudentIds.some(id => id.toString() === childId.toString())) {
-                        const student = students.find(s => s._id.toString() === childId.toString());
-                        parentNotifications.push({
-                            user: parent._id,
-                            title: 'Child Absence Alert',
-                            message: `${student?.firstName || 'Your child'} ${student?.lastName || ''} was marked absent in ${course.name} on ${attendanceDate.toDateString()}`,
-                            type: 'attendance',
-                        });
-                    }
-                });
-            });
-
-            if (parentNotifications.length > 0) {
-                await Notification.insertMany(parentNotifications);
-            }
         }
 
         res.json({ success: true, message: `Attendance marked for ${records.length} students` });
@@ -454,11 +424,11 @@ exports.markAttendance = async (req, res, next) => {
 };
 
 /**
- * GET /api/teacher/attendance/:courseId
+ * GET /api/instructor/attendance/:courseId
  */
 exports.getAttendanceReport = async (req, res, next) => {
     try {
-        const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
+        const course = await Course.findOne({ _id: req.params.courseId, instructor: req.user._id });
         if (!course) {
             return res.status(403).json({ success: false, message: 'Not authorized to view this course report' });
         }
@@ -474,11 +444,11 @@ exports.getAttendanceReport = async (req, res, next) => {
 };
 
 /**
- * GET /api/teacher/courses
+ * GET /api/instructor/courses
  */
 exports.getCourses = async (req, res, next) => {
     try {
-        const courses = await Course.find({ teacher: req.user._id });
+        const courses = await Course.find({ instructor: req.user._id }).populate('instructor', 'firstName lastName');
 
         const courseData = await Promise.all(
             courses.map(async (c) => {
@@ -494,11 +464,11 @@ exports.getCourses = async (req, res, next) => {
 };
 
 /**
- * GET /api/teacher/students/:courseId
+ * GET /api/instructor/students/:courseId
  */
 exports.getCourseStudents = async (req, res, next) => {
     try {
-        const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
+        const course = await Course.findOne({ _id: req.params.courseId, instructor: req.user._id });
         if (!course) {
             return res.status(403).json({ success: false, message: 'Not authorized to view students for this course' });
         }
@@ -513,14 +483,14 @@ exports.getCourseStudents = async (req, res, next) => {
 };
 
 /**
- * GET /api/teacher/courses/:courseId/lectures
+ * GET /api/instructor/courses/:courseId/lectures
  */
 exports.getLectures = async (req, res, next) => {
     try {
         const courseId = req.params.courseId;
 
-        // Verify the teacher owns this course
-        const course = await Course.findOne({ _id: courseId, teacher: req.user._id });
+        // Verify the instructor owns this course
+        const course = await Course.findOne({ _id: courseId, instructor: req.user._id });
         if (!course) {
             return res.status(403).json({ success: false, message: 'Not authorized to view lectures for this course' });
         }
@@ -543,14 +513,14 @@ exports.getLectures = async (req, res, next) => {
 };
 
 /**
- * POST /api/teacher/lectures
+ * POST /api/instructor/lectures
  */
 exports.uploadLecture = async (req, res, next) => {
     try {
         const { title, course: courseId, topic, type, videoUrl, description, duration } = req.body;
 
-        // Verify the teacher owns this course
-        const course = await Course.findOne({ _id: courseId, teacher: req.user._id });
+        // Verify the instructor owns this course
+        const course = await Course.findOne({ _id: courseId, instructor: req.user._id });
         if (!course) {
             return res.status(403).json({ success: false, message: 'Not authorized to upload content to this course' });
         }
@@ -589,7 +559,7 @@ exports.uploadLecture = async (req, res, next) => {
 };
 
 /**
- * DELETE /api/teacher/lectures/:lectureId
+ * DELETE /api/instructor/lectures/:lectureId
  */
 exports.deleteLecture = async (req, res, next) => {
     try {
@@ -599,12 +569,12 @@ exports.deleteLecture = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Lecture not found' });
         }
 
-        // Verify the teacher owns this lecture OR the course
+        // Verify the instructor owns this lecture OR the course
         const course = await Course.findById(lecture.course);
         const isOwner = lecture.uploadedBy.toString() === req.user._id.toString();
-        const isCourseTeacher = course && course.teacher.toString() === req.user._id.toString();
+        const isCourseInstructor = course && course.instructor.toString() === req.user._id.toString();
 
-        if (!isOwner && !isCourseTeacher) {
+        if (!isOwner && !isCourseInstructor) {
             return res.status(403).json({ success: false, message: 'Not authorized to delete this lecture' });
         }
 
@@ -631,7 +601,7 @@ exports.deleteLecture = async (req, res, next) => {
 };
 
 /**
- * GET /api/teacher/lectures/:lectureId/pdf
+ * GET /api/instructor/lectures/:lectureId/pdf
  */
 exports.getLecturePDF = async (req, res, next) => {
     try {
@@ -640,12 +610,12 @@ exports.getLecturePDF = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Lecture not found' });
         }
 
-        // Verify the teacher owns this lecture OR the course
+        // Verify the instructor owns this lecture OR the course
         const course = await Course.findById(lecture.course);
         const isOwner = lecture.uploadedBy.toString() === req.user._id.toString();
-        const isCourseTeacher = course && course.teacher.toString() === req.user._id.toString();
+        const isCourseInstructor = course && course.instructor.toString() === req.user._id.toString();
 
-        if (!isOwner && !isCourseTeacher) {
+        if (!isOwner && !isCourseInstructor) {
             return res.status(403).json({ success: false, message: 'Not authorized to view this lecture' });
         }
 
@@ -658,4 +628,71 @@ exports.getLecturePDF = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+exports.createCourse = async (req, res, next) => {
+    try {
+        const { name, code, description, category, thumbnail, difficulty, fullDescription, language, durationHours, prerequisites, learningOutcomes } = req.body;
+        if (![name, code, description, category, fullDescription, language].every((value) => typeof value === 'string' && value.trim()) || !Number.isFinite(Number(durationHours)) || Number(durationHours) < 1) return res.status(400).json({ success: false, message: 'Title, code, category, descriptions, language and duration are required' });
+        const course = await Course.create({ name: name.trim(), code: code.trim(), description: description.trim(), category, thumbnail, difficulty, fullDescription, language, durationHours, prerequisites, learningOutcomes, instructor: req.user._id, status: 'draft', isActive: false });
+        res.status(201).json({ success: true, data: { course } });
+    } catch (error) {
+        if (error.code === 11000) return res.status(409).json({ success: false, message: 'A course with this code already exists' });
+        next(error);
+    }
+};
+exports.getCategories = async (_req, res, next) => { try { const categories = await Category.find({ isActive: true }).sort('name'); res.json({ success: true, data: { categories } }); } catch (error) { next(error); } };
+exports.getCourse = async (req, res, next) => {
+    try {
+        const course = await Course.findOne({ _id: req.params.courseId, instructor: req.user._id }).populate('instructor', 'firstName lastName');
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found or not owned by you' });
+        res.json({ success: true, data: { course } });
+    } catch (error) { next(error); }
+};
+exports.updateCourse = async (req, res, next) => {
+    try {
+        const course = await Course.findOne({ _id: req.params.courseId, instructor: req.user._id });
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found or not owned by you' });
+        if (!['draft', 'changes_requested'].includes(course.status)) return res.status(409).json({ success: false, message: 'Only draft or changes-requested courses can be edited' });
+        ['name', 'code', 'description', 'category', 'thumbnail', 'difficulty', 'fullDescription', 'language', 'durationHours', 'prerequisites', 'learningOutcomes', 'modules'].forEach((field) => { if (req.body[field] !== undefined) course[field] = req.body[field]; });
+        await course.save();
+        res.json({ success: true, data: { course } });
+    } catch (error) {
+        if (error.code === 11000) return res.status(409).json({ success: false, message: 'A course with this code already exists' });
+        next(error);
+    }
+};
+exports.uploadCourseThumbnail = async (req, res, next) => {
+    try {
+        const course = await Course.findOne({ _id: req.params.courseId, instructor: req.user._id });
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found or not owned by you' });
+        if (!['draft', 'changes_requested'].includes(course.status)) return res.status(409).json({ success: false, message: 'This course cannot be edited' });
+        if (!req.file || !req.file.mimetype.startsWith('image/')) return res.status(400).json({ success: false, message: 'Select a valid image file' });
+        course.thumbnail = `/uploads/${req.file.filename}`;
+        await course.save();
+        res.json({ success: true, data: { course } });
+    } catch (error) { next(error); }
+};
+exports.submitCourseReview = async (req, res, next) => {
+    try {
+        const course = await Course.findOne({ _id: req.params.courseId, instructor: req.user._id });
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found or not owned by you' });
+        if (!['draft', 'changes_requested'].includes(course.status)) return res.status(409).json({ success: false, message: 'Course cannot be submitted in its current status' });
+        if (course.topicCount < 1) return res.status(400).json({ success: false, message: 'Add at least one lesson before submitting' });
+        if (![course.name, course.code, course.category, course.description, course.fullDescription, course.language].every((value) => typeof value === 'string' && value.trim()) || !course.durationHours) return res.status(400).json({ success: false, message: 'Complete all course details before submitting' });
+        course.status = 'pending_review'; course.submittedAt = new Date(); course.reviewMessage = undefined; await course.save();
+        const reviewers = await User.find({ role: 'reviewer', isActive: true }).select('_id');
+        const notifications = reviewers.map(reviewer => ({ user: reviewer._id, title: 'New course submitted for review', message: `"${course.name}" is waiting for content review.`, type: 'info', link: `/reviewer/courses/${course._id}/review` }));
+        notifications.push({ user: req.user._id, title: 'Course submitted', message: `"${course.name}" was submitted for content review.`, type: 'info', link: `/instructor/courses/${course._id}/reviews` });
+        await Notification.insertMany(notifications);
+        res.json({ success: true, message: 'Course submitted successfully', data: { course } });
+    } catch (error) { next(error); }
+};
+exports.getCourseReviews = async (req, res, next) => {
+    try {
+        const course = await Course.findOne({ _id: req.params.courseId, instructor: req.user._id });
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found or not owned by you' });
+        const reviews = await CourseReview.find({ course: course._id }).populate('reviewer', 'firstName lastName').sort('submissionNumber createdAt');
+        res.json({ success: true, data: { course, reviews } });
+    } catch (error) { next(error); }
 };

@@ -45,14 +45,9 @@ const seed = async () => {
             { firstName: 'Vikram', lastName: 'Singh', email: 'vikram@demo.com', password: hashedPassword, role: 'student', studentId: 'STU005', grade: '2nd Year', section: 'B' },
         ]);
 
-        const teachers = await User.insertMany([
-            { firstName: 'Dr. Anand', lastName: 'Verma', email: 'teacher@demo.com', password: hashedPassword, role: 'teacher', department: 'Computer Science', specialization: 'Operating Systems' },
-            { firstName: 'Prof. Meera', lastName: 'Iyer', email: 'meera@demo.com', password: hashedPassword, role: 'teacher', department: 'Computer Science', specialization: 'Data Structures' },
-        ]);
-
-        const parents = await User.insertMany([
-            { firstName: 'Suresh', lastName: 'Sharma', email: 'parent@demo.com', password: hashedPassword, role: 'parent', children: [students[0]._id, students[3]._id] },
-            { firstName: 'Lakshmi', lastName: 'Patel', email: 'lakshmi@demo.com', password: hashedPassword, role: 'parent', children: [students[1]._id] },
+        const instructors = await User.insertMany([
+            { firstName: 'Dr. Anand', lastName: 'Verma', email: 'instructor@demo.com', password: hashedPassword, role: 'instructor', department: 'Computer Science', specialization: 'Operating Systems' },
+            { firstName: 'Prof. Meera', lastName: 'Iyer', email: 'meera@demo.com', password: hashedPassword, role: 'instructor', department: 'Computer Science', specialization: 'Data Structures' },
         ]);
 
         const admins = await User.insertMany([
@@ -62,18 +57,18 @@ const seed = async () => {
         // ─── Create Courses ───
         console.log('📚 Creating courses...');
         const courses = await Course.insertMany([
-            { name: 'Operating Systems', code: 'OS101', description: 'Study of OS concepts including process management, memory management, and file systems', category: 'Computer Science', teacher: teachers[0]._id, chapters: [{ title: 'Process Management', order: 1 }, { title: 'Memory Management', order: 2 }, { title: 'File Systems', order: 3 }, { title: 'Deadlocks', order: 4 }] },
-            { name: 'Database Management Systems', code: 'DBMS201', description: 'Fundamentals of database design, SQL, normalization, and transaction management', category: 'Computer Science', teacher: teachers[0]._id, chapters: [{ title: 'ER Modeling', order: 1 }, { title: 'Normalization', order: 2 }, { title: 'SQL Queries', order: 3 }, { title: 'Transaction Management', order: 4 }] },
-            { name: 'Computer Networks', code: 'CN301', description: 'Network protocols, OSI model, routing, and network security', category: 'Computer Science', teacher: teachers[1]._id, chapters: [{ title: 'OSI Model', order: 1 }, { title: 'TCP/IP', order: 2 }, { title: 'Routing Algorithms', order: 3 }] },
-            { name: 'Computer Organization & Architecture', code: 'COA401', description: 'CPU design, instruction sets, memory hierarchy, and I/O systems', category: 'Computer Science', teacher: teachers[1]._id, chapters: [{ title: 'CPU Design', order: 1 }, { title: 'Memory Hierarchy', order: 2 }, { title: 'I/O Systems', order: 3 }] },
-            { name: 'Java Programming', code: 'JAVA501', description: 'Core Java, OOP, collections, multithreading, and Java EE basics', category: 'Programming', teacher: teachers[0]._id, chapters: [{ title: 'OOP Concepts', order: 1 }, { title: 'Collections Framework', order: 2 }, { title: 'Multithreading', order: 3 }] },
-            { name: 'Python Programming', code: 'PY601', description: 'Python fundamentals, data structures, libraries, and scripting', category: 'Programming', teacher: teachers[1]._id, chapters: [{ title: 'Python Basics', order: 1 }, { title: 'Data Structures', order: 2 }, { title: 'Libraries & Frameworks', order: 3 }] },
-            { name: 'Data Structures & Algorithms', code: 'DSA701', description: 'Arrays, linked lists, trees, graphs, sorting, and dynamic programming', category: 'Computer Science', teacher: teachers[1]._id, chapters: [{ title: 'Arrays & Linked Lists', order: 1 }, { title: 'Trees & Graphs', order: 2 }, { title: 'Sorting & Searching', order: 3 }, { title: 'Dynamic Programming', order: 4 }] },
-            { name: 'Big Data Analytics', code: 'BD801', description: 'Hadoop, Spark, MapReduce, and big data processing techniques', category: 'Data Science', teacher: teachers[0]._id, chapters: [{ title: 'Hadoop Ecosystem', order: 1 }, { title: 'MapReduce', order: 2 }, { title: 'Apache Spark', order: 3 }] },
-            { name: 'Aptitude & Reasoning', code: 'APT901', description: 'Quantitative aptitude, logical reasoning, and verbal ability', category: 'Aptitude', teacher: teachers[0]._id, chapters: [{ title: 'Quantitative Aptitude', order: 1 }, { title: 'Logical Reasoning', order: 2 }, { title: 'Verbal Ability', order: 3 }] },
-            { name: 'Frontend Development', code: 'FE1001', description: 'HTML, CSS, JavaScript, React, and modern frontend practices', category: 'Web Development', teacher: teachers[1]._id, chapters: [{ title: 'HTML & CSS', order: 1 }, { title: 'JavaScript ES6+', order: 2 }, { title: 'React Fundamentals', order: 3 }] },
-            { name: 'Backend Development', code: 'BE1101', description: 'Node.js, Express, REST APIs, databases, and server architecture', category: 'Web Development', teacher: teachers[0]._id, chapters: [{ title: 'Node.js Basics', order: 1 }, { title: 'Express.js', order: 2 }, { title: 'REST API Design', order: 3 }] },
-        ]);
+            { name: 'Operating Systems', code: 'OS101', description: 'Study of OS concepts including process management, memory management, and file systems', category: 'Computer Science', instructor: instructors[0]._id, chapters: [{ title: 'Process Management', order: 1 }, { title: 'Memory Management', order: 2 }, { title: 'File Systems', order: 3 }, { title: 'Deadlocks', order: 4 }] },
+            { name: 'Database Management Systems', code: 'DBMS201', description: 'Fundamentals of database design, SQL, normalization, and transaction management', category: 'Computer Science', instructor: instructors[0]._id, chapters: [{ title: 'ER Modeling', order: 1 }, { title: 'Normalization', order: 2 }, { title: 'SQL Queries', order: 3 }, { title: 'Transaction Management', order: 4 }] },
+            { name: 'Computer Networks', code: 'CN301', description: 'Network protocols, OSI model, routing, and network security', category: 'Computer Science', instructor: instructors[1]._id, chapters: [{ title: 'OSI Model', order: 1 }, { title: 'TCP/IP', order: 2 }, { title: 'Routing Algorithms', order: 3 }] },
+            { name: 'Computer Organization & Architecture', code: 'COA401', description: 'CPU design, instruction sets, memory hierarchy, and I/O systems', category: 'Computer Science', instructor: instructors[1]._id, chapters: [{ title: 'CPU Design', order: 1 }, { title: 'Memory Hierarchy', order: 2 }, { title: 'I/O Systems', order: 3 }] },
+            { name: 'Java Programming', code: 'JAVA501', description: 'Core Java, OOP, collections, multithreading, and Java EE basics', category: 'Programming', instructor: instructors[0]._id, chapters: [{ title: 'OOP Concepts', order: 1 }, { title: 'Collections Framework', order: 2 }, { title: 'Multithreading', order: 3 }] },
+            { name: 'Python Programming', code: 'PY601', description: 'Python fundamentals, data structures, libraries, and scripting', category: 'Programming', instructor: instructors[1]._id, chapters: [{ title: 'Python Basics', order: 1 }, { title: 'Data Structures', order: 2 }, { title: 'Libraries & Frameworks', order: 3 }] },
+            { name: 'Data Structures & Algorithms', code: 'DSA701', description: 'Arrays, linked lists, trees, graphs, sorting, and dynamic programming', category: 'Computer Science', instructor: instructors[1]._id, chapters: [{ title: 'Arrays & Linked Lists', order: 1 }, { title: 'Trees & Graphs', order: 2 }, { title: 'Sorting & Searching', order: 3 }, { title: 'Dynamic Programming', order: 4 }] },
+            { name: 'Big Data Analytics', code: 'BD801', description: 'Hadoop, Spark, MapReduce, and big data processing techniques', category: 'Data Science', instructor: instructors[0]._id, chapters: [{ title: 'Hadoop Ecosystem', order: 1 }, { title: 'MapReduce', order: 2 }, { title: 'Apache Spark', order: 3 }] },
+            { name: 'Aptitude & Reasoning', code: 'APT901', description: 'Quantitative aptitude, logical reasoning, and verbal ability', category: 'Aptitude', instructor: instructors[0]._id, chapters: [{ title: 'Quantitative Aptitude', order: 1 }, { title: 'Logical Reasoning', order: 2 }, { title: 'Verbal Ability', order: 3 }] },
+            { name: 'Frontend Development', code: 'FE1001', description: 'HTML, CSS, JavaScript, React, and modern frontend practices', category: 'Web Development', instructor: instructors[1]._id, chapters: [{ title: 'HTML & CSS', order: 1 }, { title: 'JavaScript ES6+', order: 2 }, { title: 'React Fundamentals', order: 3 }] },
+            { name: 'Backend Development', code: 'BE1101', description: 'Node.js, Express, REST APIs, databases, and server architecture', category: 'Web Development', instructor: instructors[0]._id, chapters: [{ title: 'Node.js Basics', order: 1 }, { title: 'Express.js', order: 2 }, { title: 'REST API Design', order: 3 }] },
+        ].map((course) => ({ ...course, status: 'published', isActive: true })));
 
         // ─── Enrollments ───
         console.log('📝 Creating enrollments...');
@@ -116,7 +111,7 @@ const seed = async () => {
                 duration: 30,
                 difficulty: 'easy',
                 maxAttempts: 999,
-                createdBy: course.teacher,
+                createdBy: course.instructor,
                 isPublished: true,
             });
 
@@ -132,7 +127,7 @@ const seed = async () => {
                 duration: 45,
                 difficulty: 'medium',
                 maxAttempts: 2,
-                createdBy: course.teacher,
+                createdBy: course.instructor,
                 isPublished: true,
             });
 
@@ -147,7 +142,7 @@ const seed = async () => {
                 duration: 90,
                 difficulty: 'hard',
                 maxAttempts: 1,
-                createdBy: course.teacher,
+                createdBy: course.instructor,
                 isPublished: true,
             });
 
@@ -205,7 +200,7 @@ const seed = async () => {
                         course: courses[j]._id,
                         date,
                         status: rand > 0.15 ? 'present' : rand > 0.05 ? 'late' : 'absent',
-                        markedBy: courses[j].teacher,
+                        markedBy: courses[j].instructor,
                     });
                 }
             }
@@ -241,8 +236,7 @@ const seed = async () => {
             { user: students[0]._id, title: 'New Assessment Available', message: 'OS Practice Test is now available. Good luck!', type: 'assignment' },
             { user: students[0]._id, title: 'Attendance Alert', message: 'Your attendance in DBMS has dropped below 80%.', type: 'warning' },
             { user: students[1]._id, title: 'Welcome to DLSES!', message: 'Start your learning journey by exploring courses.', type: 'info' },
-            { user: teachers[0]._id, title: 'New Students Enrolled', message: '3 new students enrolled in Operating Systems.', type: 'info' },
-            { user: parents[0]._id, title: 'Weekly Report', message: "Your child Rahul's weekly performance report is ready.", type: 'info' },
+            { user: instructors[0]._id, title: 'New Students Enrolled', message: '3 new students enrolled in Operating Systems.', type: 'info' },
         ]);
 
         // ─── Done ───
@@ -252,12 +246,11 @@ const seed = async () => {
         console.log('══════════════════════════════════════════════════');
         console.log('Student:  student@demo.com');
         console.log('Student:  priya@demo.com');
-        console.log('Teacher:  teacher@demo.com');
-        console.log('Teacher:  meera@demo.com');
-        console.log('Parent:   parent@demo.com');
+        console.log('Instructor:  instructor@demo.com');
+        console.log('Instructor:  meera@demo.com');
         console.log('Admin:    admin@demo.com');
         console.log('══════════════════════════════════════════════════');
-        console.log(`\n📊 Created: ${students.length} students, ${teachers.length} teachers, ${parents.length} parents, ${admins.length} admin`);
+        console.log(`\n📊 Created: ${students.length} students, ${instructors.length} instructors, ${admins.length} admin`);
         console.log(`📚 Courses: ${courses.length}`);
         console.log(`📝 Enrollments: ${enrollmentData.length}`);
         console.log(`🎥 Lectures: ${lectureData.length}`);

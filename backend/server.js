@@ -1,37 +1,32 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
+const apiRateLimit = require('./middleware/apiRateLimit');
 const path = require('path');
 
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { verifyCsrfToken } = require('./middleware/csrf');
 
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Initialize Express App
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const app = express();
 
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Security Middleware
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use(helmet());
 
-// Rate limiting — 100 requests per 15 minutes per IP
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 200,
-    message: { success: false, message: 'Too many requests, try again later.' },
-});
-app.use('/api/', limiter);
+// Separate authentication entry points from general API traffic.
+app.use('/api/', apiRateLimit);
 
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Body Parsers & CORS
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -58,7 +53,7 @@ app.use(
             if (isAllowed) {
                 callback(null, true);
             } else {
-                console.warn(`❌ CORS blocked for origin: ${origin}`);
+                console.warn(`âŒ CORS blocked for origin: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
@@ -76,18 +71,19 @@ if (process.env.NODE_ENV === 'development') {
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // CSRF Protection (all state-changing API requests)
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use('/api/', verifyCsrfToken);
 
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // API Routes
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/student', require('./routes/student'));
-app.use('/api/teacher', require('./routes/teacher'));
-app.use('/api/parent', require('./routes/parent'));
+app.use('/api/instructor', require('./routes/instructor'));
+app.use('/api/reviewer', require('./routes/reviewer'));
+app.use('/api/mentor', require('./routes/mentor'));
 app.use('/api/admin', require('./routes/admin'));
 
 // Health check
@@ -108,17 +104,21 @@ app.use((_req, res) => {
 // Centralized error handler (must be last)
 app.use(errorHandler);
 
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Start Server
-// ────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
     await connectDB();
+    if (process.env.NODE_ENV === 'development') {
+        const { verifyInstructorEmailTransport } = require('./services/instructorEmailVerification');
+        verifyInstructorEmailTransport().catch(() => {});
+    }
     app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-        console.log(`📡 API: http://localhost:${PORT}/api`);
-        console.log(`💚 Health: http://localhost:${PORT}/api/health`);
+        console.log(`ðŸš€ Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+        console.log(`ðŸ“¡ API: http://localhost:${PORT}/api`);
+        console.log(`ðŸ’š Health: http://localhost:${PORT}/api/health`);
     });
 };
 

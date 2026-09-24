@@ -18,11 +18,11 @@ const seedQuiz = async () => {
             process.exit(1);
         }
 
-        // 2. Find a Teacher
-        let teacher = await User.findOne({ email: 'teacher@demo.com' });
-        if (!teacher) teacher = await User.findOne({ role: 'teacher' });
-        if (!teacher) {
-            console.error('❌ No teacher found.');
+        // 2. Find a Instructor
+        let instructor = await User.findOne({ email: 'instructor@demo.com' });
+        if (!instructor) instructor = await User.findOne({ role: 'instructor' });
+        if (!instructor) {
+            console.error('❌ No instructor found.');
             process.exit(1);
         }
 
@@ -48,7 +48,7 @@ const seedQuiz = async () => {
                 duration: 90,
                 difficulty: 'medium',
                 maxAttempts: 999,
-                createdBy: teacher._id,
+                createdBy: instructor._id,
                 isPublished: true
             });
             console.log('   Created new Assessment.');

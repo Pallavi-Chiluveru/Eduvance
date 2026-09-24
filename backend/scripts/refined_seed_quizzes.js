@@ -2794,7 +2794,7 @@ async function seedRefinedQuizzes() {
                 isActive: true,
                 shuffleQuestions: true,
                 showScoreImmediately: true,
-                createdBy: course.teacher // Use course teacher
+                createdBy: course.instructor // Use course instructor
             });
 
             console.log(`📝 Created Assessment for ${course.name} (${assessment._id})`);

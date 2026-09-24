@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const Reward = require('../models/Reward');
+const Notification = require('../models/Notification');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../config/jwt');
+const { sendInstructorVerificationCode } = require('../services/instructorEmailVerification');
 
 // Cookie options for refresh token
 const refreshCookieOptions = {
@@ -17,7 +19,15 @@ const refreshCookieOptions = {
  */
 exports.register = async (req, res, next) => {
     try {
-        const { firstName, lastName, email, password, role, phone } = req.body;
+        const { fullName, email, password, role, phone } = req.body;
+        const normalizedName = fullName.trim().replace(/\s+/g, ' ');
+        const [firstName, ...lastNameParts] = normalizedName.split(' ');
+        const lastName = lastNameParts.join(' ');
+
+        const allowedRegistrationRoles = ['student', 'instructor'];
+        if (!allowedRegistrationRoles.includes(role)) {
+            return res.status(400).json({ success: false, message: 'Invalid registration role.' });
+        }
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -69,6 +79,15 @@ exports.register = async (req, res, next) => {
                     // Throw other errors (like validation errors or duplicate email if any)
                     throw error;
                 }
+            }
+        }
+
+        if (user.role === 'instructor') {
+            try {
+                await sendInstructorVerificationCode(user, { enforceCooldown: false });
+            } catch (error) {
+                error.message = "Your account was created, but we couldn't send the verification email. Please log in and resend the code.";
+                throw error;
             }
         }
 
@@ -148,7 +167,7 @@ exports.login = async (req, res, next) => {
                     student: user._id,
                     type: 'badge',
                     badge: 'first_login',
-                    title: 'Welcome! 👋',
+                    title: 'Welcome! ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ¢â‚¬Â¹',
                     description: 'Logged in for the first time',
                     points: 10,
                     earnedAt: new Date(),
@@ -168,6 +187,7 @@ exports.login = async (req, res, next) => {
                     role: user.role,
                     fullName: user.fullName,
                     avatar: user.avatar,
+                    instructorVerification: user.role === 'instructor' ? { status: user.instructorVerification?.status, emailVerified: user.instructorVerification?.emailVerified } : undefined,
                 },
                 accessToken,
             },
@@ -237,7 +257,7 @@ exports.logout = async (req, res, next) => {
  */
 exports.getMe = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user._id).populate('children', 'firstName lastName email studentId');
+        const user = await User.findById(req.user._id);
         res.json({
             success: true,
             data: { user },
@@ -245,4 +265,19 @@ exports.getMe = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+exports.getNotifications = async (req, res, next) => {
+    try {
+        const notifications = await Notification.find({ user: req.user._id }).sort('-createdAt').limit(50);
+        res.json({ success: true, data: { notifications } });
+    } catch (error) { next(error); }
+};
+
+exports.markNotificationRead = async (req, res, next) => {
+    try {
+        const notification = await Notification.findOneAndUpdate({ _id: req.params.id, user: req.user._id }, { isRead: true, readAt: new Date() }, { new: true });
+        if (!notification) return res.status(404).json({ success: false, message: 'Notification not found' });
+        res.json({ success: true, data: { notification } });
+    } catch (error) { next(error); }
 };

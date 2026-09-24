@@ -14,23 +14,29 @@ exports.getDashboard = async (req, res, next) => {
     try {
         const [
             totalStudents,
-            totalTeachers,
-            totalParents,
+            totalInstructors,
             totalAdmins,
+            totalReviewers,
+            totalMentors,
             totalCourses,
             totalAssessments,
             activeUsers,
+            pendingInstructorRequests,
+            publishedCourses,
         ] = await Promise.all([
             User.countDocuments({ role: 'student', isActive: true }),
-            User.countDocuments({ role: 'teacher', isActive: true }),
-            User.countDocuments({ role: 'parent', isActive: true }),
+            User.countDocuments({ role: 'instructor', isActive: true }),
             User.countDocuments({ role: 'admin', isActive: true }),
+            User.countDocuments({ role: 'reviewer', isActive: true }),
+            User.countDocuments({ role: 'mentor', isActive: true }),
             Course.countDocuments({ isActive: true }),
             Assessment.countDocuments({ isActive: true }),
             User.countDocuments({
                 isActive: true,
                 lastLogin: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
             }),
+            User.countDocuments({ role: 'instructor', isDeleted: false, 'instructorVerification.status': 'pending' }),
+            Course.countDocuments({ isActive: true, status: 'published' }),
         ]);
 
         const recentUsers = await User.find()
@@ -42,11 +48,14 @@ exports.getDashboard = async (req, res, next) => {
             success: true,
             data: {
                 stats: {
+                    totalInstructors,
+                    pendingInstructorRequests,
+                    publishedCourses,
                     totalStudents,
-                    totalTeachers,
-                    totalParents,
                     totalAdmins,
-                    totalUsers: totalStudents + totalTeachers + totalParents + totalAdmins,
+                    totalReviewers,
+                    totalMentors,
+                    totalUsers: totalStudents + totalInstructors + totalAdmins + totalReviewers + totalMentors,
                     totalCourses,
                     totalAssessments,
                     activeUsersLast7Days: activeUsers,
@@ -106,7 +115,7 @@ exports.getUsers = async (req, res, next) => {
  */
 exports.createUser = async (req, res, next) => {
     try {
-        const { firstName, lastName, email, password, role, phone, studentId, grade, section, children } = req.body;
+        const { firstName, lastName, email, password, role, phone, studentId, grade, section } = req.body;
 
         const user = await User.create({
             firstName,
@@ -118,7 +127,6 @@ exports.createUser = async (req, res, next) => {
             studentId,
             grade,
             section,
-            children,
         });
 
         res.status(201).json({
@@ -143,11 +151,12 @@ exports.createUser = async (req, res, next) => {
  */
 exports.updateUser = async (req, res, next) => {
     try {
-        const { firstName, lastName, email, role, phone, isActive, grade, section, department, children } = req.body;
+        const { firstName, lastName, email, role, phone, isActive, grade, section, department } = req.body;
+        if (String(req.user._id) === req.params.id && ((role !== undefined && role !== 'admin') || isActive === false)) return res.status(403).json({ success: false, message: 'You cannot change your own admin role or deactivate your account.' });
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { firstName, lastName, email, role, phone, isActive, grade, section, department, children },
+            { firstName, lastName, email, role, phone, isActive, grade, section, department },
             { new: true, runValidators: true }
         );
 
@@ -166,6 +175,7 @@ exports.updateUser = async (req, res, next) => {
  */
 exports.deleteUser = async (req, res, next) => {
     try {
+        if (String(req.user._id) === req.params.id) return res.status(403).json({ success: false, message: "You cannot delete your own admin account." });
         const user = await User.findByIdAndUpdate(
             req.params.id,
             { isDeleted: true, isActive: false },
@@ -234,7 +244,7 @@ exports.bulkImportUsers = async (req, res, next) => {
 exports.getCourses = async (req, res, next) => {
     try {
         const courses = await Course.find()
-            .populate('teacher', 'firstName lastName email');
+            .populate('instructor', 'firstName lastName email');
 
         const courseData = await Promise.all(
             courses.map(async (c) => {
@@ -254,14 +264,14 @@ exports.getCourses = async (req, res, next) => {
  */
 exports.createCourse = async (req, res, next) => {
     try {
-        const { name, code, description, category, teacher, chapters } = req.body;
+        const { name, code, description, category, instructor, chapters } = req.body;
 
         const course = await Course.create({
             name,
             code,
             description,
             category,
-            teacher,
+            instructor,
             chapters,
         });
 
@@ -287,6 +297,25 @@ exports.updateCourse = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+exports.reviewCourse = async (req, res, next) => {
+    try {
+        const { action, message = '' } = req.body;
+        const transitions = { request_changes: 'changes_requested', approve: 'approved', publish: 'published', archive: 'archived' };
+        const nextStatus = transitions[action];
+        if (!nextStatus) return res.status(400).json({ success: false, message: 'Invalid review action' });
+        const course = await Course.findById(req.params.id);
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
+        const allowed = { request_changes: ['submitted', 'pending_review'], approve: ['submitted', 'pending_review'], publish: ['approved'], archive: ['published', 'approved'] };
+        if (!allowed[action].includes(course.status)) return res.status(409).json({ success: false, message: `Cannot ${action.replace('_', ' ')} a ${course.status} course` });
+        if (action === 'request_changes' && !message.trim()) return res.status(400).json({ success: false, message: 'A change request message is required' });
+        course.status = nextStatus; course.reviewMessage = message.trim(); course.reviewedBy = req.user._id; course.reviewedAt = new Date();
+        course.isActive = nextStatus === 'published';
+        if (nextStatus === 'published') course.publishedAt = new Date();
+        await course.save();
+        res.json({ success: true, data: { course } });
+    } catch (error) { next(error); }
 };
 
 /**

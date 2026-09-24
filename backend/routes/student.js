@@ -37,5 +37,6 @@ router.post('/chat', studentController.chat);
 router.get('/chat/history', studentController.getChatHistory);
 router.get('/notifications', studentController.getNotifications);
 router.put('/notifications/:id/read', studentController.markNotificationRead);
+router.get('/mentor-feedback', studentController.getMentorFeedback);
 
 module.exports = router;

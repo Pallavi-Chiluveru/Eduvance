@@ -36,7 +36,7 @@ unit{chapter}-{sanitized-filename}-{timestamp}.{extension}
 ## How It Works
 
 ### Upload Process
-1. Teacher selects a course and uploads a PDF/document
+1. Instructor selects a course and uploads a PDF/document
 2. System creates course-specific folder if it doesn't exist: `uploads/lectures/{courseId}/`
 3. File is saved with structured naming convention
 4. MongoDB stores only the **relative URL path**: `/uploads/lectures/{courseId}/filename.pdf`
@@ -49,7 +49,7 @@ unit{chapter}-{sanitized-filename}-{timestamp}.{extension}
 4. File downloads to student's device
 
 ### Delete Process
-1. Teacher deletes a lecture
+1. Instructor deletes a lecture
 2. System removes the MongoDB document
 3. System also deletes the physical file from disk
 4. Prevents orphaned files and saves storage space
@@ -99,7 +99,7 @@ MAX_FILE_SIZE=52428800      # 50 MB in bytes
 
 - Files are served through Express static middleware
 - No direct file system access from frontend
-- Teacher authorization required for upload/delete
+- Instructor authorization required for upload/delete
 - Student authentication required for download
 - File type validation on upload
 

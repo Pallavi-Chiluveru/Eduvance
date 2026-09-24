@@ -47,15 +47,10 @@ const seed = async () => {
             { firstName: 'Vikram', lastName: 'Singh', email: 'vikram@demo.com', password: hashedPassword, role: 'student', studentId: 'STU005', grade: '2nd Year', section: 'B' },
         ]);
 
-        const teachers = await User.insertMany([
-            { firstName: 'Dr. Anand', lastName: 'Verma', email: 'teacher@demo.com', password: hashedPassword, role: 'teacher', department: 'Computer Science', specialization: 'Operating Systems' },
-            { firstName: 'Prof. Meera', lastName: 'Iyer', email: 'meera@demo.com', password: hashedPassword, role: 'teacher', department: 'Computer Science', specialization: 'Computer Architecture' },
-            { firstName: 'Dr. Rajesh', lastName: 'Kumar', email: 'rajesh@demo.com', password: hashedPassword, role: 'teacher', department: 'Computer Science', specialization: 'Database Systems' },
-        ]);
-
-        const parents = await User.insertMany([
-            { firstName: 'Amit', lastName: 'Shah', email: 'parent@demo.com', password: hashedPassword, role: 'parent', children: [students[0]._id, students[1]._id] },
-            { firstName: 'Sunita', lastName: 'Reddy', email: 'sunita@demo.com', password: hashedPassword, role: 'parent', children: [students[2]._id, students[3]._id] },
+        const instructors = await User.insertMany([
+            { firstName: 'Dr. Anand', lastName: 'Verma', email: 'instructor@demo.com', password: hashedPassword, role: 'instructor', department: 'Computer Science', specialization: 'Operating Systems' },
+            { firstName: 'Prof. Meera', lastName: 'Iyer', email: 'meera@demo.com', password: hashedPassword, role: 'instructor', department: 'Computer Science', specialization: 'Computer Architecture' },
+            { firstName: 'Dr. Rajesh', lastName: 'Kumar', email: 'rajesh@demo.com', password: hashedPassword, role: 'instructor', department: 'Computer Science', specialization: 'Database Systems' },
         ]);
 
         const admins = await User.insertMany([
@@ -70,7 +65,7 @@ const seed = async () => {
                 code: 'CS301',
                 description: 'Fundamentals of operating system design, process management, memory management, and file systems.',
                 category: 'Computer Science',
-                teacher: teachers[0]._id,
+                instructor: instructors[0]._id,
                 topics: [
                     { title: 'Introduction to OS', order: 1 },
                     { title: 'Process Management', order: 2 },
@@ -88,7 +83,7 @@ const seed = async () => {
                 code: 'CS302',
                 description: 'Digital logic, computer arithmetic, processor design, memory organization, and instruction set architecture.',
                 category: 'Computer Science',
-                teacher: teachers[1]._id,
+                instructor: instructors[1]._id,
                 topics: [
                     { title: 'Digital Logic & Number Systems', order: 1 },
                     { title: 'Computer Arithmetic', order: 2 },
@@ -103,7 +98,7 @@ const seed = async () => {
                 code: 'CS303',
                 description: 'Database design, SQL, normalization, transaction management, and query processing.',
                 category: 'Computer Science',
-                teacher: teachers[2]._id,
+                instructor: instructors[2]._id,
                 topics: [
                     { title: 'Introduction to Databases', order: 1 },
                     { title: 'Relational Model', order: 2 },
@@ -118,7 +113,7 @@ const seed = async () => {
                 code: 'CS304',
                 description: 'Object-oriented programming with Java, covering core concepts, collections, multithreading, and exception handling.',
                 category: 'Programming',
-                teacher: teachers[0]._id,
+                instructor: instructors[0]._id,
                 topics: [
                     { title: 'Java Basics & Syntax', order: 1 },
                     { title: 'Object-Oriented Programming', order: 2 },
@@ -133,7 +128,7 @@ const seed = async () => {
                 code: 'CS305',
                 description: 'Python fundamentals, data structures, file handling, libraries, and practical applications.',
                 category: 'Programming',
-                teacher: teachers[1]._id,
+                instructor: instructors[1]._id,
                 topics: [
                     { title: 'Python Basics & Data Types', order: 1 },
                     { title: 'Control Flow & Functions', order: 2 },
@@ -148,7 +143,7 @@ const seed = async () => {
                 code: 'CS306',
                 description: 'Comprehensive study of data structures, algorithms, complexity analysis, and problem-solving techniques.',
                 category: 'Computer Science',
-                teacher: teachers[2]._id,
+                instructor: instructors[2]._id,
                 topics: [
                     { title: 'Arrays & Linked Lists', order: 1 },
                     { title: 'Stacks, Queues & Trees', order: 2 },
@@ -163,7 +158,7 @@ const seed = async () => {
                 code: 'CS307',
                 description: 'Foundation of programming with C language, covering syntax, pointers, memory management, and file operations.',
                 category: 'Programming',
-                teacher: teachers[0]._id,
+                instructor: instructors[0]._id,
                 topics: [
                     { title: 'C Basics & Data Types', order: 1 },
                     { title: 'Control Structures & Functions', order: 2 },
@@ -178,7 +173,7 @@ const seed = async () => {
                 code: 'APT101',
                 description: 'Quantitative aptitude, logical reasoning, verbal ability, and analytical skills for competitive exams and placements.',
                 category: 'Aptitude',
-                teacher: teachers[1]._id,
+                instructor: instructors[1]._id,
                 topics: [
                     { title: 'Quantitative Aptitude', order: 1 },
                     { title: 'Logical Reasoning', order: 2 },
@@ -192,7 +187,7 @@ const seed = async () => {
                 code: 'AI101',
                 description: 'Artificial Intelligence fundamentals, covering core concepts, applications, and recent advancements.',
                 category: 'AI',
-                teacher: teachers[1]._id,
+                instructor: instructors[1]._id,
                 topics: [
                     { title: 'Introduction to AI', order: 1 },
                     { title: 'Machine Learning', order: 2 },
@@ -255,7 +250,7 @@ const seed = async () => {
                     videoUrl: url,
                     description: title,
                     duration: '10:00',
-                    uploadedBy: teachers[0]._id,
+                    uploadedBy: instructors[0]._id,
                     order: pos,
                 });
             }
@@ -284,7 +279,7 @@ const seed = async () => {
             duration: 30,
             difficulty: 'easy',
             maxAttempts: 999,
-            createdBy: teachers[1]._id,
+            createdBy: instructors[1]._id,
             isPublished: true,
         });
 
@@ -299,7 +294,7 @@ const seed = async () => {
             duration: 45,
             difficulty: 'medium',
             maxAttempts: 2,
-            createdBy: teachers[1]._id,
+            createdBy: instructors[1]._id,
             isPublished: true,
         });
 
@@ -313,7 +308,7 @@ const seed = async () => {
             duration: 90,
             difficulty: 'hard',
             maxAttempts: 1,
-            createdBy: teachers[1]._id,
+            createdBy: instructors[1]._id,
             isPublished: true,
         });
 
@@ -508,7 +503,7 @@ const seed = async () => {
         await Notification.insertMany(notifications);
 
         console.log('🎉 Seeding completed successfully!');
-        console.log(`📊 Created ${students.length} students, ${teachers.length} teachers, ${parents.length} parents, ${admins.length} admins`);
+        console.log(`📊 Created ${students.length} students, ${instructors.length} instructors, ${admins.length} admins`);
         console.log(`📚 Created ${courses.length} courses`);
         console.log(`📝 Created assessments with specific COA questions`);
         console.log(`🃏 Created ${flashcards.length} flashcards`);

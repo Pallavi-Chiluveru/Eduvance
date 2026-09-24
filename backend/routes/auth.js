@@ -12,5 +12,7 @@ router.post('/login', loginValidation, validate, authController.login);
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', protect, authController.logout);
 router.get('/me', protect, authController.getMe);
+router.get('/notifications', protect, authController.getNotifications);
+router.put('/notifications/:id/read', protect, authController.markNotificationRead);
 
 module.exports = router;
