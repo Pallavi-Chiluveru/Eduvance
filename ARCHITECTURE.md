@@ -230,21 +230,152 @@ class USERSDB,COURSEDB,ASSESSDB,LEARNDB,REVIEWDB,CERTDB database;
 ```
 
 ## Description of Architecture
+Description of Architecture
 
-1.  **User Roles**:
-    *   **Student**: Accesses courses, watches lectures, takes quizzes, and submits assignments.
-    *   **Instructor**: Creates courses, uploads lectures, manages content, and grades submissions.
-    *   **Admin**: Oversees the entire platform, manages users, and handles system configurations.
+EduVance is a role-based online learning platform designed to manage the complete learning lifecycle, from course creation and content review to student learning, assessments, progress tracking, mentoring, and certification.
 
-2.  **Frontend**:
-    *   Built with **React** and **Vite** for a fast, modern single-page application experience.
-    *   Uses **Role-Based Dashboards** to show relevant information for each user type.
+The platform provides separate functionalities for Students, Instructors, Content Reviewers, Mentors, and Platform Administrators. Each role has specific permissions and a dedicated dashboard based on its responsibilities.
 
-3.  **Backend**:
-    *   **Node.js** and **Express** provide a robust RESTful API.
-    *   **JWT Authentication** ensures secure access to routes.
-    *   **Middleware** handles role verification (e.g., only Instructors can create courses).
+1. User Roles
+Student: Enrolls in approved courses, watches lessons, attempts quizzes, submits assignments, tracks progress, receives feedback, and earns certificates.
+Instructor: Creates and manages courses, modules, lessons, quizzes, and assignments. Instructors can also evaluate student submissions and monitor course performance.
+Content Reviewer: Reviews submitted courses and ensures that the content meets the required standards before publication. Reviewers can approve, reject, or request changes.
+Mentor: Monitors student progress, provides personalized feedback, identifies learning difficulties, and supports students through mentoring.
+Platform Admin: Manages users, categories, platform policies, course workflows, moderation, configurations, and overall platform analytics.
+2. Frontend
 
-4.  **Database**:
-    *   **MongoDB** stores all application data in a flexible, document-oriented format.
-    *   Collections include Users, Courses, Lectures, Enrollments, and Submissions.
+The frontend is developed using React and Vite to provide a fast and responsive single-page application.
+
+It uses role-based dashboards so that each user can access the features relevant to their role. The frontend handles course browsing, learning interfaces, assessments, progress tracking, dashboards, analytics, and other user interactions.
+
+3. Backend
+
+The backend is built using Node.js and Express.js and provides RESTful APIs for communication between the frontend and database.
+
+It manages:
+
+Authentication and authorization
+Role-based access control
+Course and content management
+Course approval workflow
+Quizzes and assessments
+Assignment submissions and evaluation
+Student progress tracking
+Certificates and feedback
+Notifications, search, and filtering
+Analytics
+AI-based learning features
+
+JWT authentication is used to securely authenticate users, while middleware is used to verify roles and restrict unauthorized operations.
+
+4. Database
+
+MongoDB is used as the primary database for storing platform data.
+
+Major collections include:
+
+Users
+Courses
+Modules
+Lessons
+Enrollments
+Quizzes
+Questions
+Assignments
+Submissions
+Progress
+Certificates
+Feedback
+Notifications
+Reviews
+
+MongoDB provides a flexible document-based structure suitable for managing the different types of learning content and user activity.
+
+5. Course Management Workflow
+
+Instructors can create courses and organize them into modules, lessons, quizzes, and assignments.
+
+Courses follow a controlled workflow:
+
+Draft → Submitted → Under Review → Approved / Changes Requested / Rejected → Published
+
+This ensures that course content is reviewed by a Content Reviewer before being made available to students.
+
+6. Learning and Assessment
+
+Students can enroll in approved courses and access their learning content.
+
+The platform supports:
+
+Structured courses and modules
+Video/lecture-based learning
+Quizzes and question banks
+Randomized questions
+Attempt limits
+Automatic quiz scoring
+Assignment submissions
+Instructor/mentor evaluation
+Feedback and result history
+
+Student assessment results are used to update their overall learning progress.
+
+7. Progress Tracking
+
+EduVance tracks student activity and performance throughout a course.
+
+Progress tracking includes:
+
+Lesson completion
+Course completion percentage
+Quiz performance
+Assignment performance
+Assessment attempts
+Weak learning areas
+Overall course completion
+
+Students can use this information to understand their learning progress, while instructors and mentors can use it to identify areas where additional support is required.
+
+8. AI-Powered Learning
+
+EduVance integrates AI to provide a more personalized learning experience.
+
+Based on a student's learning goals, progress, assessment performance, and weak concepts, the system can:
+
+Generate personalized learning paths
+Identify weak concepts
+Recommend relevant lessons and revision activities
+Provide feedback on learner performance
+
+The AI functionality complements instructors and mentors by providing additional personalized guidance to students.
+
+9. Instructor Analytics
+
+Instructors can monitor the performance of their courses through analytics such as:
+
+Student enrollment
+Course completion
+Quiz performance
+Assignment performance
+Student progress
+Frequently difficult topics
+Learner engagement
+
+These insights help instructors understand student performance and improve their course content.
+
+10. Security and Authorization
+
+EduVance uses JWT-based authentication and role-based authorization to protect platform resources.
+
+Different roles have different permissions. For example, instructors can manage their own courses, reviewers can review submitted courses, students can access their enrolled courses, and administrators have platform-level management privileges.
+
+This ensures that users can only access and modify resources they are authorized to use.
+
+Technology Stack
+Frontend: React, Vite
+Backend: Node.js, Express.js
+Database: MongoDB
+Authentication: JWT
+Authorization: Role-Based Access Control (RBAC)
+AI: AI-powered personalization and learning recommendations
+
+Overall, EduVance provides a complete learning ecosystem that connects course creation, content validation, student learning, assessments, mentoring, analytics, certification, and AI-powered personalization in a single platform.
