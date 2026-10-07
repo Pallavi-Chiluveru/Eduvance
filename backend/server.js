@@ -111,10 +111,6 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
     await connectDB();
-    if (process.env.NODE_ENV === 'development') {
-        const { verifyInstructorEmailTransport } = require('./services/instructorEmailVerification');
-        verifyInstructorEmailTransport().catch(() => {});
-    }
     app.listen(PORT, () => {
         console.log(`ðŸš€ Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
         console.log(`ðŸ“¡ API: http://localhost:${PORT}/api`);

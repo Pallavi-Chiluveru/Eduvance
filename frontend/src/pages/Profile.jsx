@@ -4,6 +4,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { HiOutlineUser, HiOutlineMail, HiOutlinePhone, HiOutlineLockClosed, HiOutlinePencil, HiOutlineCamera } from 'react-icons/hi';
+import UserAvatar from '../components/common/UserAvatar';
 
 export default function Profile() {
     const { user, loadUser } = useAuth();
@@ -137,15 +138,7 @@ export default function Profile() {
                 <div className="flex items-start gap-6">
                     {/* Avatar */}
                     <div className="relative">
-                        <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center overflow-hidden">
-                            {user.avatar ? (
-                                <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="text-white text-3xl font-bold">
-                                    {user.firstName?.[0]}{user.lastName?.[0]}
-                                </span>
-                            )}
-                        </div>
+                        <UserAvatar user={user} className="w-24 h-24" textClassName="text-3xl" />
                         {/* Hidden file input */}
                         <input
                             ref={avatarInputRef}

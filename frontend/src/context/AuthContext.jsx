@@ -41,12 +41,15 @@ export function AuthProvider({ children }) {
     }, []);
 
     const register = useCallback(async (userData) => {
-        const res = await api.post('/auth/register', userData);
-        const { user: newUser, accessToken: token } = res.data.data;
+        const isMultipart = userData instanceof FormData;
+        const res = await api.post('/auth/register', userData, isMultipart ? {
+            headers: { 'Content-Type': undefined },
+        } : undefined);
+        const { user: newUser, accessToken: token, verificationEmailSent } = res.data.data;
         localStorage.setItem('accessToken', token);
         setAccessToken(token);
         setUser(newUser);
-        return newUser;
+        return { ...newUser, verificationEmailSent };
     }, []);
 
     const logout = useCallback(async () => {

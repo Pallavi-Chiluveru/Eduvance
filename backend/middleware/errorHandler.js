@@ -58,6 +58,14 @@ const errorHandler = (err, req, res, _next) => {
         });
     }
 
+    if (err.name === 'MulterError') {
+        return res.status(400).json({ success: false, message: err.code === 'LIMIT_FILE_SIZE' ? 'Profile image must be 5 MB or smaller.' : 'Invalid profile image upload.' });
+    }
+
+    if (err.message === 'Profile image must be a JPEG, PNG, or WebP image.') {
+        return res.status(400).json({ success: false, message: err.message });
+    }
+
     // Default
     const statusCode = err.statusCode || 500;
     res.status(statusCode).json({

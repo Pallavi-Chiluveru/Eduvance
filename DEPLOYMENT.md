@@ -23,6 +23,9 @@ Render will host your Node.js API.
     *   `JWT_SECRET`: `a_very_long_random_string`
     *   `JWT_REFRESH_SECRET`: `another_long_random_string`
     *   `GEMINI_API_KEY`: `your_gemini_api_key`
+    *   `RESEND_API_KEY`: your Resend API key (backend only)
+    *   `EMAIL_FROM`: `onboarding@resend.dev` for testing, or an address on a verified EduVance domain
+    *   `EMAIL_FROM_NAME`: `EduVance`
     *   `CORS_ORIGIN`: `https://your-frontend.vercel.app` (You will get this from Vercel later)
 6.  **Deploy**: Click **Create Web Service**.
 
@@ -46,6 +49,7 @@ Vercel will host your React/Vite application.
     *   **Output Directory**: `dist`
 6.  **Environment Variables**:
     *   `VITE_API_URL`: `https://your-backend.onrender.com/api` (Paste your Render URL here)
+    *   Do not add `RESEND_API_KEY` or other mail credentials to frontend/Vite variables. Email is sent by the backend.
 7.  **Deploy**: Click **Deploy**.
 
 ---
@@ -76,3 +80,7 @@ git push origin main
 ```
 
 ------
+
+## Local email configuration
+
+Set `RESEND_API_KEY`, `EMAIL_FROM`, and `EMAIL_FROM_NAME` in `backend/.env`. For initial testing, use `EMAIL_FROM=onboarding@resend.dev`; production should use a sender address from a verified EduVance domain. Configure the same three values as environment variables on the deployed backend (Render), never in the Vercel frontend project. The application uses Resend's HTTPS API; Gmail SMTP settings are no longer used.

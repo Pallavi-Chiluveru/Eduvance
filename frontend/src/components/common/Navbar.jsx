@@ -12,6 +12,7 @@ import {
 import Logo from './Logo';
 import { authAPI } from '../../services/apiService';
 import toast from 'react-hot-toast';
+import UserAvatar from './UserAvatar';
 
 export default function Navbar({ onToggleSidebar }) {
     const { user, logout } = useAuth();
@@ -217,11 +218,7 @@ export default function Navbar({ onToggleSidebar }) {
                                 {user?.role}
                             </span>
                         </div>
-                        <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
-                                {user?.firstName?.[0]}{user?.lastName?.[0]}
-                            </span>
-                        </div>
+                        <UserAvatar user={user} className="w-9 h-9" textClassName="text-sm" />
                     </button>
 
                     {dropdownOpen && (

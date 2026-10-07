@@ -15,6 +15,7 @@ const validate = (req, res, next) => {
             })),
         });
     }
+    if (req.body.fullName) req.body.fullName = req.body.fullName.trim();
     next();
 };
 

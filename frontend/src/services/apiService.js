@@ -31,6 +31,7 @@ export const studentAPI = {
     getRewards: () => api.get('/student/rewards'),
     chat: (message) => api.post('/student/chat', { message }),
     getChatHistory: () => api.get('/student/chat/history'),
+    clearChatHistory: () => api.delete('/student/chat/history'),
     getNotifications: () => api.get('/student/notifications'),
     markNotificationRead: (id) => api.put(`/student/notifications/${id}/read`),
     getLearningJourney: () => api.get('/student/learning-journey'),

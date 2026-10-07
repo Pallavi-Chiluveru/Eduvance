@@ -47,6 +47,7 @@ const courseSchema = new mongoose.Schema(
         ],
         chapters: [{ title: { type: String, required: true }, order: { type: Number, default: 0 } }],
         thumbnail: String,
+        playlistUrl: { type: String, trim: true },
         difficulty: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
         modules: [{ title: { type: String, required: true, trim: true }, order: { type: Number, default: 0 }, lessons: [{ title: { type: String, required: true, trim: true }, order: { type: Number, default: 0 } }] }],
         status: { type: String, enum: ['draft', 'submitted', 'pending_review', 'under_review', 'changes_requested', 'approved', 'published', 'rejected', 'archived'], default: 'draft' },

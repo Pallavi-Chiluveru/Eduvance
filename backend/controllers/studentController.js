@@ -268,7 +268,7 @@ exports.getDashboard = async (req, res, next) => {
 exports.getCourses = async (req, res, next) => {
     try {
         const enrollments = await Enrollment.find({ student: req.user._id })
-            .populate('course', 'name code description fullDescription category topics chapters modules thumbnail difficulty language durationHours prerequisites learningOutcomes instructor status isActive')
+            .populate('course', 'name code description fullDescription category topics chapters modules thumbnail playlistUrl difficulty language durationHours prerequisites learningOutcomes instructor status isActive')
             .populate({
                 path: 'course',
                 populate: { path: 'instructor', select: 'firstName lastName' },
@@ -1083,7 +1083,57 @@ exports.getRewards = async (req, res, next) => {
 exports.chat = async (req, res, next) => {
     try {
         const { message } = req.body;
-        const { response, category, isAI } = await getResponse(message); // Now async for AI
+        if (typeof message !== 'string' || !message.trim() || message.trim().length > 2000) {
+            return res.status(400).json({ success: false, message: 'Message must be between 1 and 2,000 characters.' });
+        }
+
+        const [history, enrollments, attendance, results, recentActivity, mentorAssignment] = await Promise.all([
+            ChatMessage.find({ user: req.user._id }).sort('-createdAt').limit(4).select('message response').lean(),
+            Enrollment.find({ student: req.user._id, status: { $ne: 'dropped' } })
+                .populate({ path: 'course', select: 'name code description fullDescription learningOutcomes topics chapters modules difficulty' })
+                .select('course status progress completedChapters viewedLectures').lean(),
+            Attendance.find({ student: req.user._id }).sort('-date').limit(30).select('course date status').populate('course', 'name code').lean(),
+            Result.find({ student: req.user._id }).sort('-createdAt').limit(10).select('assessment obtainedMarks totalMarks percentage grade isPassed createdAt')
+                .populate({ path: 'assessment', select: 'title topic course', populate: { path: 'course', select: 'name code' } }).lean(),
+            Activity.find({ student: req.user._id }).sort('-date').limit(7).select('dateString points activities').lean(),
+            MentorAssignment.findOne({ student: req.user._id, status: 'active' }).populate('mentor', 'firstName lastName specialization').lean(),
+        ]);
+
+        const courseIds = enrollments.map(({ course }) => course?._id).filter(Boolean);
+        const [lectures, availableAssessments] = courseIds.length ? await Promise.all([
+            Lecture.find({ course: { $in: courseIds }, isActive: true })
+                .select('title topic course description order').sort({ order: 1 }).limit(30).populate('course', 'name code').lean(),
+            Assessment.find({ course: { $in: courseIds }, isPublished: true, isActive: true })
+                .select('title topic course type assessmentType description instructions totalMarks passingMarks duration difficulty startDate endDate')
+                .sort('-createdAt').limit(20).populate('course', 'name code').lean(),
+        ]) : [[], []];
+
+        const context = {
+            studentRole: req.user.role,
+            courseOutlines: enrollments.filter((e) => e.course).map((e) => ({
+                name: e.course.name,
+                code: e.course.code,
+                description: e.course.description,
+                fullDescription: e.course.fullDescription,
+                learningOutcomes: e.course.learningOutcomes,
+                topics: e.course.topics?.map((t) => t.title),
+                chapters: e.course.chapters?.map((c) => c.title),
+                modules: e.course.modules?.map((m) => ({ title: m.title, lessons: m.lessons?.map((l) => l.title) })),
+                difficulty: e.course.difficulty,
+                enrollmentStatus: e.status,
+                progressPercent: e.progress,
+                completedLessons: e.viewedLectures?.length || 0,
+                completedChapters: e.completedChapters,
+            })),
+            courseMaterials: lectures.map((lecture) => ({ course: lecture.course?.name, title: lecture.title, topic: lecture.topic, description: lecture.description?.slice(0, 300) })),
+            availableAssessments: availableAssessments.map((assessment) => ({ course: assessment.course?.name, title: assessment.title, topic: assessment.topic, type: assessment.type, assessmentType: assessment.assessmentType, description: assessment.description, instructions: assessment.instructions, totalMarks: assessment.totalMarks, passingMarks: assessment.passingMarks, durationMinutes: assessment.duration, difficulty: assessment.difficulty, startDate: assessment.startDate, endDate: assessment.endDate })),
+            assessmentResults: results.map((result) => ({ assessment: result.assessment?.title, topic: result.assessment?.topic, course: result.assessment?.course?.name, score: `${result.obtainedMarks}/${result.totalMarks}`, percentage: result.percentage, grade: result.grade, passed: result.isPassed, date: result.createdAt })),
+            recentAttendance: attendance.map((record) => ({ course: record.course?.name, date: record.date, status: record.status })),
+            recentLearningActivity: recentActivity,
+            assignedMentor: mentorAssignment?.mentor ? { name: `${mentorAssignment.mentor.firstName} ${mentorAssignment.mentor.lastName}`.trim(), specialization: mentorAssignment.mentor.specialization } : null,
+        };
+
+        const { response, category, isAI } = await getResponse(message.trim(), history.reverse(), context);
 
         const chatMsg = await ChatMessage.create({
             user: req.user._id,
@@ -1146,6 +1196,18 @@ exports.markNotificationRead = async (req, res, next) => {
             { isRead: true, readAt: new Date() }
         );
         res.json({ success: true, message: 'Notification marked as read' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * DELETE /api/student/chat/history
+ */
+exports.clearChatHistory = async (req, res, next) => {
+    try {
+        await ChatMessage.deleteMany({ user: req.user._id });
+        res.json({ success: true, message: 'Chat history cleared' });
     } catch (error) {
         next(error);
     }

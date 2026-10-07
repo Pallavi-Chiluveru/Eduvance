@@ -12,7 +12,6 @@ export default function CourseDetail() {
     const tabParam = searchParams.get('tab');
     const [course, setCourse] = useState(null);
     const [lectures, setLectures] = useState({});
-    const [modules, setModules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(tabParam || 'topics');
     const [selectedPDF, setSelectedPDF] = useState(null);
@@ -50,7 +49,6 @@ export default function CourseDetail() {
             );
             setCourse(courseData);
             setLectures(lecturesRes.data.data.lectures);
-            setModules(lecturesRes.data.data.modules || []);
 
             // Filter assessments
             const allAssessments = assessmentsRes.data.data.assessments || [];
@@ -145,6 +143,17 @@ export default function CourseDetail() {
                                     {course.course.description}
                                 </p>
                             )}
+                            {course.course?.playlistUrl && (
+                                <a
+                                    href={course.course.playlistUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-2 mt-4 text-sm font-medium text-rose-600 hover:text-rose-700"
+                                >
+                                    <HiOutlinePlay className="w-4 h-4" />
+                                    Open complete YouTube playlist
+                                </a>
+                            )}
                         </div>
                         <div className="text-right">
                             <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Progress</p>
@@ -159,7 +168,7 @@ export default function CourseDetail() {
                         active={activeTab === 'topics'}
                         onClick={() => handleTabChange('topics')}
                         label="Topics"
-                        count={modules.reduce((sum, module) => sum + module.lessons.length, 0) || topics.length}
+                        count={topics.length}
                     />
                     <TabButton
                         active={activeTab === 'quizzes'}
@@ -178,7 +187,7 @@ export default function CourseDetail() {
                 {/* Content */}
                 {activeTab === 'topics' && (
                     <div className="space-y-3">
-                        {modules.length > 0 ? modules.map((module, index) => <ModuleOutline key={module._id || index} module={module} index={index} />) : topics.length === 0 ? (
+                        {topics.length === 0 ? (
                             <EmptyState message="No topics available yet" />
                         ) : (
                             topics.map((topic) => (
@@ -305,10 +314,6 @@ function TabButton({ active, onClick, label, count }) {
     );
 }
 
-function ModuleOutline({ module, index }) {
-    return <section className='rounded-xl p-5' style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}><p className='text-xs' style={{ color: 'var(--text-muted)' }}>MODULE {index + 1}</p><h2 className='font-bold text-lg mb-3'>{module.title}</h2><ol className='space-y-2'>{module.lessons.map((lesson, lessonIndex) => <li key={lesson._id || lessonIndex} className='p-3 rounded-lg' style={{ background: 'var(--bg-tertiary)' }}>{lessonIndex + 1}. {lesson.title}</li>)}</ol></section>;
-}
-
 function TopicSection({ topic, lectures, expanded, onToggle, getYouTubeEmbedUrl, onPDFClick, onLectureViewed, viewedLectures }) {
     return (
         <div
@@ -409,22 +414,32 @@ function LectureListItem({ lecture, index, getYouTubeEmbedUrl, onPDFClick, onLec
 
                             {/* Action Button */}
                             {lecture.type === 'video' && embedUrl ? (
-                                <button
-                                    onClick={() => {
-                                        if (!showVideo) {
-                                            studentAPI.viewLecture(lecture._id)
-                                                .then(res => {
-                                                    onLectureViewed(res.data?.progress, lecture._id);
-                                                })
-                                                .catch(console.error);
-                                        }
-                                        setShowVideo(!showVideo);
-                                    }}
-                                    className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-rose-500 hover:bg-rose-600 transition-colors flex items-center gap-2"
-                                >
-                                    <HiOutlinePlay className="w-4 h-4" />
-                                    {showVideo ? 'Hide' : 'Watch'}
-                                </button>
+                                <div className="flex flex-wrap items-center justify-end gap-2">
+                                    <a
+                                        href={lecture.videoUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="px-3 py-2 rounded-lg text-sm font-medium text-rose-600 border border-rose-200 hover:bg-rose-50 dark:border-rose-900/50 dark:hover:bg-rose-900/20 transition-colors"
+                                    >
+                                        YouTube
+                                    </a>
+                                    <button
+                                        onClick={() => {
+                                            if (!showVideo) {
+                                                studentAPI.viewLecture(lecture._id)
+                                                    .then(res => {
+                                                        onLectureViewed(res.data?.progress, lecture._id);
+                                                    })
+                                                    .catch((error) => toast.error(error.response?.data?.message || 'Unable to save progress'));
+                                            }
+                                            setShowVideo(!showVideo);
+                                        }}
+                                        className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-rose-500 hover:bg-rose-600 transition-colors flex items-center gap-2"
+                                    >
+                                        <HiOutlinePlay className="w-4 h-4" />
+                                        {showVideo ? 'Hide' : 'Watch'}
+                                    </button>
+                                </div>
                             ) : lecture.fileUrl ? (
                                 <button
                                     onClick={() => {

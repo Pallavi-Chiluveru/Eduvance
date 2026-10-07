@@ -3,6 +3,10 @@ const Reward = require('../models/Reward');
 const Notification = require('../models/Notification');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../config/jwt');
 const { sendInstructorVerificationCode } = require('../services/instructorEmailVerification');
+const { uploadToCloudinary } = require('../utils/cloudinary');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
 // Cookie options for refresh token
 const refreshCookieOptions = {
@@ -18,6 +22,8 @@ const refreshCookieOptions = {
  * Register a new user
  */
 exports.register = async (req, res, next) => {
+    let tempImagePath;
+    let uploadedImage;
     try {
         const { fullName, email, password, role, phone } = req.body;
         const normalizedName = fullName.trim().replace(/\s+/g, ' ');
@@ -33,6 +39,20 @@ exports.register = async (req, res, next) => {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(409).json({ success: false, message: 'Email already registered' });
+        }
+
+        let avatar = '';
+        if (req.file) {
+            tempImagePath = path.join(os.tmpdir(), `registration-${Date.now()}-${Math.round(Math.random() * 1e9)}`);
+            await fs.promises.writeFile(tempImagePath, req.file.buffer);
+            try {
+                uploadedImage = await uploadToCloudinary(tempImagePath, process.env.CLOUDINARY_FOLDER || 'avatars');
+                avatar = uploadedImage.secure_url;
+            } catch (_error) {
+                // A profile photo is optional. Cloudinary outages or missing
+                // credentials must not prevent account registration.
+                console.error('Registration profile image upload failed; continuing without avatar.');
+            }
         }
 
         let user;
@@ -65,15 +85,17 @@ exports.register = async (req, res, next) => {
                     role,
                     phone,
                     studentId: generatedStudentId,
+                    avatar,
                 });
-                
                 break; // Successfully created user, exit loop
             } catch (error) {
                 // If there's a collision on studentId, retry
                 if (error.code === 11000 && error.keyPattern && error.keyPattern.studentId) {
                     retries++;
                     if (retries === maxRetries) {
-                        return res.status(500).json({ success: false, message: 'Failed to generate unique student ID. Please try again.' });
+                        const error = new Error('Failed to generate unique student ID. Please try again.');
+                        error.statusCode = 500;
+                        throw error;
                     }
                 } else {
                     // Throw other errors (like validation errors or duplicate email if any)
@@ -82,12 +104,16 @@ exports.register = async (req, res, next) => {
             }
         }
 
+        let verificationEmailSent = true;
         if (user.role === 'instructor') {
             try {
                 await sendInstructorVerificationCode(user, { enforceCooldown: false });
             } catch (error) {
-                error.message = "Your account was created, but we couldn't send the verification email. Please log in and resend the code.";
-                throw error;
+                verificationEmailSent = false;
+                console.error('Registration verification email unavailable', {
+                    EMAIL_PROVIDER: 'resend', EMAIL_TYPE: 'verification', RECIPIENT: '<redacted>',
+                    ERROR: error.code === 'EMAIL_DELIVERY_FAILED' ? 'provider delivery failed; see preceding Email delivery failed log for the sanitized provider reason' : error.message,
+                });
             }
         }
 
@@ -105,7 +131,7 @@ exports.register = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: 'Registration successful',
+            message: verificationEmailSent ? 'Registration successful' : 'Your account was created, but we could not send the verification email. Sign in and request a new code.',
             data: {
                 user: {
                     id: user._id,
@@ -114,12 +140,26 @@ exports.register = async (req, res, next) => {
                     email: user.email,
                     role: user.role,
                     fullName: user.fullName,
+                    avatar: user.avatar,
                 },
                 accessToken,
+                verificationEmailSent: user.role === 'instructor' ? verificationEmailSent : null,
             },
         });
     } catch (error) {
+        // Keep successfully-created accounts when a later step fails so retries
+        // cannot create duplicates; users can sign in and request verification again.
+        if (uploadedImage?.public_id) {
+            const { cloudinary } = require('../utils/cloudinary');
+            await cloudinary.uploader.destroy(uploadedImage.public_id).catch(() => {});
+        }
+        if (error.code === 'CLOUDINARY_CONFIG_MISSING') {
+            error.statusCode = 503;
+            error.message = 'Profile image upload is not configured. Remove the image and retry, or contact support.';
+        }
         next(error);
+    } finally {
+        if (tempImagePath) await fs.promises.unlink(tempImagePath).catch(() => {});
     }
 };
 

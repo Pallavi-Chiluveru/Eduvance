@@ -35,6 +35,7 @@ router.put('/flashcards/:id/review', studentController.reviewFlashcard);
 router.get('/rewards', studentController.getRewards);
 router.post('/chat', studentController.chat);
 router.get('/chat/history', studentController.getChatHistory);
+router.delete('/chat/history', studentController.clearChatHistory);
 router.get('/notifications', studentController.getNotifications);
 router.put('/notifications/:id/read', studentController.markNotificationRead);
 router.get('/mentor-feedback', studentController.getMentorFeedback);

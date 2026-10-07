@@ -192,11 +192,13 @@
 /* ─── Markdown Styles for Chatbot ─── */
 .chatbot-markdown {
   line-height: 1.6;
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .chatbot-markdown p {
-  margin-bottom: 1rem;
+  margin: 0 0 0.85rem;
 }
 
 .chatbot-markdown p:last-child {
@@ -215,8 +217,82 @@
 }
 
 .chatbot-markdown li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
+
+.chatbot-markdown li:last-child { margin-bottom: 0; }
+
+.chatbot-markdown h1,
+.chatbot-markdown h2,
+.chatbot-markdown h3,
+.chatbot-markdown h4,
+.chatbot-markdown h5,
+.chatbot-markdown h6 {
+  margin: 1.25rem 0 0.55rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.chatbot-markdown h1 { font-size: 1.3rem; }
+.chatbot-markdown h2 { font-size: 1.15rem; }
+.chatbot-markdown h3 { font-size: 1.05rem; }
+.chatbot-markdown h4,
+.chatbot-markdown h5,
+.chatbot-markdown h6 { font-size: 0.98rem; }
+
+.chatbot-markdown h1:first-child,
+.chatbot-markdown h2:first-child,
+.chatbot-markdown h3:first-child,
+.chatbot-markdown h4:first-child { margin-top: 0; }
+
+.chatbot-markdown blockquote {
+  margin: 0.8rem 0;
+  padding: 0.4rem 0.8rem;
+  border-left: 3px solid var(--color-primary);
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-secondary) 65%, transparent);
+  border-radius: 0 0.4rem 0.4rem 0;
+}
+
+.chatbot-markdown a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.chatbot-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0.8rem 0 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.6rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chatbot-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.chatbot-markdown th,
+.chatbot-markdown td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-color);
+  overflow-wrap: anywhere;
+}
+
+.chatbot-markdown th {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
+}
+
+.chatbot-markdown tr:last-child td { border-bottom: 0; }
 
 .chatbot-markdown ul {
   list-style-type: disc;
@@ -241,6 +317,9 @@
   padding: 1rem;
   border-radius: 8px;
   overflow-x: auto;
+  max-width: 100%;
+  white-space: pre;
+  overflow-wrap: normal;
   margin-bottom: 1rem;
   border: 1px solid #334155;
 }
@@ -254,18 +333,6 @@
   line-height: 1.5;
 }
 
-.chatbot-markdown h1,
-.chatbot-markdown h2,
-.chatbot-markdown h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.chatbot-markdown h3 {
-  font-size: 1.125rem;
-}
 /* Student dashboard */
 :root{--sd-grid:#e8edf5;--sd-hover:rgba(99,102,241,.06)}.dark{--sd-grid:#2b3850;--sd-hover:rgba(129,140,248,.08)}
 .student-dashboard{position:relative;max-width:1500px;margin:auto;display:flex;flex-direction:column;gap:24px;color:var(--text-primary)}.sd-glow{position:absolute;z-index:-1;border-radius:999px;filter:blur(70px);opacity:.12;pointer-events:none}.sd-glow.one{width:280px;height:220px;background:#6366f1;top:-80px;right:5%}.sd-glow.two{width:230px;height:180px;background:#22d3ee;top:420px;left:15%}.sd-header{display:flex;align-items:end;justify-content:space-between;gap:24px;padding:8px 2px}.sd-header p{color:#6366f1;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}.dark .sd-header p{color:#a5b4fc}.sd-header h1{font-size:clamp(24px,3vw,34px);line-height:1.2;font-weight:800;letter-spacing:-.035em}.sd-header>div>span{display:block;margin-top:7px;color:var(--text-muted);font-size:14px}.sd-primary,.sd-course-foot>a{display:inline-flex;align-items:center;justify-content:center;gap:8px;color:white!important;background:linear-gradient(135deg,#4f46e5,#6366f1 55%,#0891b2);padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 9px 25px rgba(79,70,229,.22);transition:.2s}.sd-primary:hover,.sd-course-foot>a:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(79,70,229,.3)}.sd-primary svg,.sd-course-foot svg,.sd-view-all svg{width:16px}

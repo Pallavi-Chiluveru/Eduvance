@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import { studentAPI } from '../../services/apiService';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -7,39 +9,47 @@ import { HiOutlinePaperAirplane, HiOutlineExclamation, HiOutlineRefresh } from '
 
 export default function StudentChatbot() {
     const { user } = useAuth();
+    const studentId = user?._id || user?.id;
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [historyLoading, setHistoryLoading] = useState(true);
+    const [clearing, setClearing] = useState(false);
     const [error, setError] = useState(null);
     const messagesEnd = useRef(null);
+    const operationRef = useRef(false);
+    const sendInProgressRef = useRef(false);
+    const welcomeMessage = "Hi! I'm your AI learning assistant. I can help you with:\n\n• Course information\n• Test preparation\n• Study tips\n• Subject-specific questions\n• And much more!\n\nWhat would you like to know?";
 
     const loadChatHistory = async () => {
+        if (operationRef.current || sendInProgressRef.current) return;
+        operationRef.current = true;
         try {
             setHistoryLoading(true);
             const res = await studentAPI.getChatHistory();
-            const history = res.data.data.history || [];
+            const history = res.data.data.messages || res.data.data.history || [];
             if (history.length > 0) {
                 setMessages(history.flatMap((h) => [
                     { role: 'user', text: h.message, timestamp: h.createdAt },
-                    { role: 'bot', text: h.reply, timestamp: h.createdAt },
+                    { role: 'bot', text: h.response ?? h.reply, timestamp: h.createdAt },
                 ]));
             } else {
-                setMessages([{ role: 'bot', text: "Hi! I'm your AI learning assistant. I can help you with:\n\n• Course information\n• Test preparation\n• Study tips\n• Subject-specific questions\n• And much more!\n\nWhat would you like to know?" }]);
+                setMessages([{ role: 'bot', text: welcomeMessage }]);
             }
             setError(null);
         } catch (err) {
             console.error('Chat history error:', err);
             setError('Failed to load chat history');
-            setMessages([{ role: 'bot', text: "Hi! I'm your AI learning assistant. Ask me anything about your courses!" }]);
+            toast.error('Failed to load chat history');
         } finally {
             setHistoryLoading(false);
+            operationRef.current = false;
         }
     };
 
     useEffect(() => {
-        loadChatHistory();
-    }, []);
+        if (studentId) loadChatHistory();
+    }, [studentId]);
 
     useEffect(() => {
         messagesEnd.current?.scrollIntoView({ behavior: 'smooth' });
@@ -47,12 +57,13 @@ export default function StudentChatbot() {
 
     const send = async (e) => {
         e.preventDefault();
-        if (!input.trim() || loading) return;
+        if (!input.trim() || loading || historyLoading || clearing) return;
 
         const msg = input.trim();
         setInput('');
         setMessages((prev) => [...prev, { role: 'user', text: msg, timestamp: new Date() }]);
         setLoading(true);
+        sendInProgressRef.current = true;
         setError(null);
 
         try {
@@ -65,12 +76,26 @@ export default function StudentChatbot() {
             toast.error('Failed to send message');
         } finally {
             setLoading(false);
+            sendInProgressRef.current = false;
         }
     };
 
-    const clearChat = () => {
-        setMessages([{ role: 'bot', text: "Chat cleared! How can I help you today?" }]);
-        toast.success('Chat cleared');
+    const clearChat = async () => {
+        if (operationRef.current || sendInProgressRef.current || !window.confirm('Clear your chat history? This cannot be undone.')) return;
+        operationRef.current = true;
+        setClearing(true);
+        try {
+            await studentAPI.clearChatHistory();
+            setMessages([{ role: 'bot', text: welcomeMessage }]);
+            setError(null);
+            toast.success('Chat cleared');
+        } catch (err) {
+            console.error('Clear chat error:', err);
+            toast.error(err.response?.data?.message || 'Failed to clear chat. Please try again.');
+        } finally {
+            operationRef.current = false;
+            setClearing(false);
+        }
     };
 
     const quickQuestions = [
@@ -98,27 +123,28 @@ export default function StudentChatbot() {
                 <div className="flex gap-2">
                     <button
                         onClick={clearChat}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                        disabled={clearing || historyLoading || loading}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50"
                         style={{
                             borderColor: 'var(--border-color)',
                             color: 'var(--text-primary)',
                             background: 'var(--bg-card)'
                         }}
                     >
-                        Clear Chat
+                        {clearing ? 'Clearing…' : 'Clear Chat'}
                     </button>
                     <button
-                        onClick={loadChatHistory}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                        onClick={() => loadChatHistory()}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-50"
                         style={{
                             borderColor: 'var(--border-color)',
                             color: 'var(--text-primary)',
                             background: 'var(--bg-card)'
                         }}
-                        disabled={historyLoading}
+                        disabled={historyLoading || clearing || loading}
                     >
                         <HiOutlineRefresh className={`w-4 h-4 ${historyLoading ? 'animate-spin' : ''}`} />
-                        Refresh
+                        {historyLoading ? 'Refreshing...' : 'Refresh'}
                     </button>
                 </div>
             </div>
@@ -147,13 +173,27 @@ export default function StudentChatbot() {
                 )}
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${m.role === 'user'
+                        <div className={`min-w-0 max-w-[88%] px-4 py-2.5 rounded-2xl text-sm ${m.role === 'user'
                             ? 'gradient-primary text-white rounded-br-md'
                             : 'rounded-bl-md'
                             }`} style={m.role !== 'user' ? { background: 'var(--bg-tertiary)', color: 'var(--text-primary)' } : {}}>
                             <div className={m.role === 'bot' ? 'chatbot-markdown' : ''} style={{ whiteSpace: m.role === 'user' ? 'pre-wrap' : 'normal' }}>
                                 {m.role === 'bot' ? (
-                                    <ReactMarkdown>{m.text}</ReactMarkdown>
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                                        components={{
+                                            table: ({ children, ...props }) => (
+                                                <div className="chatbot-table-wrap">
+                                                    <table {...props}>{children}</table>
+                                                </div>
+                                            ),
+                                            a: ({ children, ...props }) => (
+                                                <a {...props} target="_blank" rel="noopener noreferrer">{children}</a>
+                                            ),
+                                        }}
+                                    >
+                                        {m.text}
+                                    </ReactMarkdown>
                                 ) : (
                                     m.text
                                 )}

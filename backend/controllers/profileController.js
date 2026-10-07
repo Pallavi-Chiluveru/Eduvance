@@ -13,6 +13,14 @@ exports.getProfile = async (req, res, next) => {
             data: { user },
         });
     } catch (error) {
+        if (error.code === 'CLOUDINARY_CONFIG_MISSING') {
+            error.statusCode = 503;
+            error.message = 'Avatar uploads are not configured on the server.';
+        }
+        if (req.file?.path) {
+            const fs = require('fs');
+            await fs.promises.unlink(req.file.path).catch(() => {});
+        }
         next(error);
     }
 };
@@ -100,7 +108,11 @@ exports.uploadAvatar = async (req, res, next) => {
             });
         }
 
-        const avatarUrl = await uploadToCloudinary(req.file.path, 'avatars');
+        const uploadedAvatar = await uploadToCloudinary(req.file.path, 'avatars');
+        const avatarUrl = uploadedAvatar?.secure_url;
+        if (!avatarUrl) {
+            return res.status(502).json({ success: false, message: 'Cloudinary did not return an avatar URL. Please retry.' });
+        }
 
         const user = await User.findByIdAndUpdate(
             req.user._id,

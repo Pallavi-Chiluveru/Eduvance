@@ -4,6 +4,7 @@ import { HiOutlineArrowRight, HiOutlineBookOpen, HiOutlineCalendar, HiOutlineCha
 import { HiOutlineRocketLaunch } from 'react-icons/hi2';
 import { studentAPI } from '../../services/apiService';
 import { useAuth } from '../../hooks/useAuth';
+import UserAvatar from '../../components/common/UserAvatar';
 
 const Title=({icon,title,subtitle})=><div className="sd-title"><span>{createElement(icon)}</span><div><h2>{title}</h2><p>{subtitle}</p></div></div>;
 const StatCard=({item,navigate})=><button className="sd-stat" onClick={()=>navigate(item.to)}><span className={`sd-stat-icon ${item.tone}`}><item.icon/></span><span><small>{item.title}</small><strong>{item.value}</strong></span></button>;
@@ -22,5 +23,5 @@ export default function StudentDashboard(){
  const load=useCallback(async()=>{setError(false);try{const r=await studentAPI.getDashboard();setData(r.data.data)}catch(e){console.error('Dashboard load error:',e);setError(true)}finally{setLoading(false)}},[]);useEffect(()=>{load()},[load]);
  if(loading)return <Skeleton/>;if(error)return <div className="sd-error"><span>!</span><h2>Couldn't load your learning progress.</h2><p>Your dashboard hit a small snag. Please try again.</p><button onClick={()=>{setLoading(true);load()}}>Try Again</button></div>;
  const s=data?.stats||{};const stats=[['Assessments Taken',s.totalTests||0,HiOutlineClipboardCheck,'indigo','/student/assessments'],['Average Score',`${s.avgScore||0}%`,HiOutlineChartBar,'cyan','/student/performance'],['Learning Streak',`${s.currentStreak||0} Days`,HiOutlineFire,'rose','/student/learning-journey'],['Reward Points',s.totalPoints||0,HiOutlineStar,'amber','/student/rewards']].map(([title,value,icon,tone,to])=>({title,value,icon,tone,to}));
- return <div className="student-dashboard"><i className="sd-glow one"/><i className="sd-glow two"/><header className="sd-header"><div><p>Your learning space</p><h1>Welcome back, {user?.firstName||'Student'}! <span aria-hidden="true">&#128075;</span></h1><span>Here's your learning progress today.</span></div></header><div className="sd-stats">{stats.map(x=><StatCard item={x} navigate={navigate} key={x.title}/>)}</div><ContinueLearning courses={data?.recentCourses}/><UpcomingAssessments items={data?.upcomingAssessments}/></div>;
+ return <div className="student-dashboard"><i className="sd-glow one"/><i className="sd-glow two"/><header className="sd-header"><div className="flex items-center gap-4"><UserAvatar user={user} className="w-14 h-14" textClassName="text-lg"/><div><p>Your learning space</p><h1>Welcome back, {user?.firstName||'Student'}! <span aria-hidden="true">&#128075;</span></h1><span>Here's your learning progress today.</span></div></div></header><div className="sd-stats">{stats.map(x=><StatCard item={x} navigate={navigate} key={x.title}/>)}</div><ContinueLearning courses={data?.recentCourses}/><UpcomingAssessments items={data?.upcomingAssessments}/></div>;
 }

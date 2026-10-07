@@ -10,6 +10,8 @@ export default function Register() {
     const navigate = useNavigate();
     const { register: registerUser } = useAuth();
     const [loading, setLoading] = useState(false);
+    const [profileImage, setProfileImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState('');
     const [isDarkMode, setIsDarkMode] = useState(true);
     const [formData, setFormData] = useState({
         fullName: '',
@@ -47,6 +49,27 @@ export default function Register() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) {
+            setProfileImage(null);
+            setImagePreview('');
+            return;
+        }
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            toast.error('Choose a JPEG, PNG, or WebP image.');
+            e.target.value = '';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Profile image must be 5 MB or smaller.');
+            e.target.value = '';
+            return;
+        }
+        setProfileImage(file);
+        setImagePreview(URL.createObjectURL(file));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -73,15 +96,26 @@ export default function Register() {
 
         setLoading(true);
         try {
-            const registerData = { ...formData };
-            delete registerData.confirmPassword;
-            await registerUser({ ...registerData, fullName });
-            toast.success(formData.role === 'instructor' ? 'Verification code sent to your email.' : 'Registration successful! Redirecting...');
+            const registerData = new FormData();
+            Object.entries({ ...formData, fullName }).forEach(([key, value]) => {
+                if (key !== 'confirmPassword') registerData.append(key, value);
+            });
+            if (profileImage) registerData.append('profileImage', profileImage);
+            const response = await registerUser(registerData);
+            if (formData.role === 'instructor' && response?.verificationEmailSent === false) {
+                toast.error('Your account was created, but the verification email could not be sent. Sign in and resend the code.');
+            } else {
+                toast.success(formData.role === 'instructor' ? 'Verification code sent to your email.' : 'Registration successful! Redirecting...');
+            }
             setTimeout(() => {
                 navigate(formData.role === 'instructor' ? '/instructor/verification/email' : '/student');
             }, 1000);
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Registration failed');
+            const status = error.response?.status;
+            const message = status === 409
+                ? 'An account with this email already exists. Sign in to continue; if it is an unverified instructor account, you can resend its verification code after signing in.'
+                : error.response?.data?.message || 'We could not complete registration. Please check your details and try again.';
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -195,6 +229,16 @@ export default function Register() {
                                 </div>
                             </div>
 
+
+                            {/* Optional Profile Image */}
+                            <div className="group/input">
+                                <label htmlFor="profileImage" className="block text-sm font-bold mb-2 transition-colors text-slate-600 dark:text-slate-300">Profile Image <span className="font-normal text-slate-400">(optional)</span></label>
+                                <div className="flex items-center gap-4">
+                                    {imagePreview && <img src={imagePreview} alt="Profile image preview" className="w-14 h-14 rounded-full object-cover border border-slate-300 dark:border-slate-600" />}
+                                    <input id="profileImage" name="profileImage" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} className="w-full text-sm text-slate-600 dark:text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-purple-100 file:px-4 file:py-2 file:font-semibold file:text-purple-700 hover:file:bg-purple-200 dark:file:bg-slate-700 dark:file:text-slate-100" />
+                                </div>
+                                <p className="mt-1 text-xs text-slate-400">JPEG, PNG, or WebP; up to 5 MB.</p>
+                            </div>
 
                             {/* Password */}
                             <div className="group/input">
